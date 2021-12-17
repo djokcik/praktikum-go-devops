@@ -1,0 +1,17 @@
+package metrics
+
+import (
+	"math/rand"
+)
+
+type randomValue struct {
+	gaugeBaseMetric
+}
+
+func (a randomValue) Name() string {
+	return "RandomValue"
+}
+
+func (a randomValue) GetValue() interface{} {
+	return gauge(rand.Float64())
+}
