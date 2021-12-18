@@ -1,17 +1,19 @@
 package metrics
 
-import "runtime"
+import (
+	"runtime"
+)
 
-type lookups struct {
-	gaugeBaseMetric
+type Lookups struct {
+	GaugeBaseMetric
 }
 
-func (a lookups) Name() string {
+func (a Lookups) Name() string {
 	return "Lookups"
 }
 
-func (a lookups) GetValue() interface{} {
+func (a Lookups) GetValue() interface{} {
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
-	return gauge(memStats.Lookups)
+	return Gauge(memStats.Lookups)
 }

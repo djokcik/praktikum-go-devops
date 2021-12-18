@@ -1,17 +1,19 @@
 package metrics
 
-import "runtime"
+import (
+	"runtime"
+)
 
-type sys struct {
-	gaugeBaseMetric
+type Sys struct {
+	GaugeBaseMetric
 }
 
-func (a sys) Name() string {
+func (a Sys) Name() string {
 	return "Sys"
 }
 
-func (a sys) GetValue() interface{} {
+func (a Sys) GetValue() interface{} {
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
-	return gauge(memStats.Sys)
+	return Gauge(memStats.Sys)
 }

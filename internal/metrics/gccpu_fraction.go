@@ -1,17 +1,19 @@
 package metrics
 
-import "runtime"
+import (
+	"runtime"
+)
 
-type gCCPUFraction struct {
-	gaugeBaseMetric
+type GCCPUFraction struct {
+	GaugeBaseMetric
 }
 
-func (a gCCPUFraction) Name() string {
+func (a GCCPUFraction) Name() string {
 	return "GCCPUFraction"
 }
 
-func (a gCCPUFraction) GetValue() interface{} {
+func (a GCCPUFraction) GetValue() interface{} {
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
-	return gauge(memStats.GCCPUFraction)
+	return Gauge(memStats.GCCPUFraction)
 }

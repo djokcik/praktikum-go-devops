@@ -1,62 +1,63 @@
 package metrics
 
-type gauge float64
-type counter int64
+type Gauge float64
+type Counter int64
 
 const (
-	Gauge   = "gauge"
-	Counter = "counter"
+	GaugeType   = "gauge"
+	CounterType = "counter"
 )
 
-type gaugeBaseMetric struct {
+type GaugeBaseMetric struct {
 }
 
-func (v gaugeBaseMetric) Type() string {
-	return Gauge
+func (v GaugeBaseMetric) Type() string {
+	return GaugeType
 }
 
-type counterBaseMetric struct {
+type CounterBaseMetric struct {
 }
 
-func (v counterBaseMetric) Type() string {
-	return Counter
+func (v CounterBaseMetric) Type() string {
+	return CounterType
 }
 
 type Metric interface {
 	Type() string
 	Name() string
-	GetValue() interface{}
 }
 
-func GetMetrics() []Metric {
+func GetGaugesMetrics() []Metric {
 	return []Metric{
-		// gauges
-		buckHashSys{},
-		frees{},
-		gCSys{},
-		gCCPUFraction{},
-		heapAlloc{},
-		heapIdle{},
-		heapInuse{},
-		heapObjects{},
-		heapReleased{},
-		heapSys{},
-		lastGC{},
-		lookups{},
-		mCacheInuse{},
-		mCacheSys{},
-		mSpanInuse{},
-		mSpanSys{},
-		nextGC{},
-		numForcedGC{},
-		numGC{},
-		otherSys{},
-		pauseTotalNs{},
-		stackInuse{},
-		stackSys{},
-		sys{},
+		BuckHashSys{},
+		Frees{},
+		GCSys{},
+		GCCPUFraction{},
+		HeapAlloc{},
+		HeapIdle{},
+		HeapInuse{},
+		HeapObjects{},
+		HeapReleased{},
+		HeapSys{},
+		LastGC{},
+		Lookups{},
+		MCacheInuse{},
+		MCacheSys{},
+		MSpanInuse{},
+		MSpanSys{},
+		NextGC{},
+		NumForcedGC{},
+		NumGC{},
+		OtherSys{},
+		PauseTotalNs{},
+		StackInuse{},
+		StackSys{},
+		Sys{},
+	}
+}
 
-		// counter
+func GetCounterMetrics() []Metric {
+	return []Metric{
 		PollCount{},
 	}
 }

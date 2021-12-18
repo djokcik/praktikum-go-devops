@@ -1,8 +1,8 @@
 package metrics
 
 type PollCount struct {
-	counterBaseMetric
-	value counter
+	CounterBaseMetric
+	value Counter
 }
 
 func (a PollCount) Name() string {

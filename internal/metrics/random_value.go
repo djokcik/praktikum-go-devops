@@ -5,7 +5,7 @@ import (
 )
 
 type randomValue struct {
-	gaugeBaseMetric
+	GaugeBaseMetric
 }
 
 func (a randomValue) Name() string {
@@ -13,5 +13,5 @@ func (a randomValue) Name() string {
 }
 
 func (a randomValue) GetValue() interface{} {
-	return gauge(rand.Float64())
+	return Gauge(rand.Float64())
 }

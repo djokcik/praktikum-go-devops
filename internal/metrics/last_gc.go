@@ -1,17 +1,19 @@
 package metrics
 
-import "runtime"
+import (
+	"runtime"
+)
 
-type lastGC struct {
-	gaugeBaseMetric
+type LastGC struct {
+	GaugeBaseMetric
 }
 
-func (a lastGC) Name() string {
+func (a LastGC) Name() string {
 	return "LastGC"
 }
 
-func (a lastGC) GetValue() interface{} {
+func (a LastGC) GetValue() interface{} {
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
-	return gauge(memStats.LastGC)
+	return Gauge(memStats.LastGC)
 }

@@ -1,17 +1,19 @@
 package metrics
 
-import "runtime"
+import (
+	"runtime"
+)
 
-type heapInuse struct {
-	gaugeBaseMetric
+type HeapInuse struct {
+	GaugeBaseMetric
 }
 
-func (a heapInuse) Name() string {
+func (a HeapInuse) Name() string {
 	return "HeapInuse"
 }
 
-func (a heapInuse) GetValue() interface{} {
+func (a HeapInuse) GetValue() interface{} {
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
-	return gauge(memStats.HeapInuse)
+	return Gauge(memStats.HeapInuse)
 }

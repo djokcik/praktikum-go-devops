@@ -1,17 +1,19 @@
 package metrics
 
-import "runtime"
+import (
+	"runtime"
+)
 
-type stackInuse struct {
-	gaugeBaseMetric
+type StackInuse struct {
+	GaugeBaseMetric
 }
 
-func (a stackInuse) Name() string {
+func (a StackInuse) Name() string {
 	return "StackInuse"
 }
 
-func (a stackInuse) GetValue() interface{} {
+func (a StackInuse) GetValue() interface{} {
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
-	return gauge(memStats.StackInuse)
+	return Gauge(memStats.StackInuse)
 }

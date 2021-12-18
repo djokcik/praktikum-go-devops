@@ -1,17 +1,19 @@
 package metrics
 
-import "runtime"
+import (
+	"runtime"
+)
 
-type gCSys struct {
-	gaugeBaseMetric
+type GCSys struct {
+	GaugeBaseMetric
 }
 
-func (a gCSys) Name() string {
+func (a GCSys) Name() string {
 	return "GCSys"
 }
 
-func (a gCSys) GetValue() interface{} {
+func (a GCSys) GetValue() interface{} {
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
-	return gauge(memStats.GCSys)
+	return Gauge(memStats.GCSys)
 }

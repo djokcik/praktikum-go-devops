@@ -2,12 +2,13 @@ package agent
 
 import (
 	"fmt"
-	"github.com/Jokcik/praktikum-go-devops/internal/metrics"
+
+	"github.com/Jokcik/praktikum-go-devops/internal/agent/agentmetrics"
 	"net/http"
 	"time"
 )
 
-func ReportMetricsToServer(updatedMetric *map[string]metrics.Metric) {
+func ReportMetricsToServer(updatedMetric map[string]agentmetrics.AgentMetric) {
 	const reportInterval = 10
 	const host = "127.0.0.1"
 	const port = "8080"
@@ -18,7 +19,7 @@ func ReportMetricsToServer(updatedMetric *map[string]metrics.Metric) {
 	for {
 		<-ticker.C
 
-		for _, metric := range *updatedMetric {
+		for _, metric := range updatedMetric {
 			url := fmt.Sprintf("http://%s:%s/update/%s/%s/%v", host, port, metric.Type(), metric.Name(), metric.GetValue())
 
 			req, err := http.NewRequest(http.MethodPost, url, nil)

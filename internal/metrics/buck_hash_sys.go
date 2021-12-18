@@ -1,18 +1,20 @@
 package metrics
 
-import "runtime"
+import (
+	"runtime"
+)
 
-type buckHashSys struct {
-	gaugeBaseMetric
+type BuckHashSys struct {
+	GaugeBaseMetric
 }
 
-func (a buckHashSys) Name() string {
+func (a BuckHashSys) Name() string {
 	return "BuckHashSys"
 }
 
-func (a buckHashSys) GetValue() interface{} {
+func (a BuckHashSys) GetValue() interface{} {
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
 
-	return gauge(memStats.BuckHashSys)
+	return Gauge(memStats.BuckHashSys)
 }

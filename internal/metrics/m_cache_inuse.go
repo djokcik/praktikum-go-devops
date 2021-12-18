@@ -1,17 +1,19 @@
 package metrics
 
-import "runtime"
+import (
+	"runtime"
+)
 
-type mCacheInuse struct {
-	gaugeBaseMetric
+type MCacheInuse struct {
+	GaugeBaseMetric
 }
 
-func (a mCacheInuse) Name() string {
+func (a MCacheInuse) Name() string {
 	return "MCacheInuse"
 }
 
-func (a mCacheInuse) GetValue() interface{} {
+func (a MCacheInuse) GetValue() interface{} {
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
-	return gauge(memStats.MCacheInuse)
+	return Gauge(memStats.MCacheInuse)
 }

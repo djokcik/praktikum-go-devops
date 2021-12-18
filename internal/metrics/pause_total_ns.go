@@ -1,17 +1,19 @@
 package metrics
 
-import "runtime"
+import (
+	"runtime"
+)
 
-type pauseTotalNs struct {
-	gaugeBaseMetric
+type PauseTotalNs struct {
+	GaugeBaseMetric
 }
 
-func (a pauseTotalNs) Name() string {
+func (a PauseTotalNs) Name() string {
 	return "PauseTotalNs"
 }
 
-func (a pauseTotalNs) GetValue() interface{} {
+func (a PauseTotalNs) GetValue() interface{} {
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
-	return gauge(memStats.PauseTotalNs)
+	return Gauge(memStats.PauseTotalNs)
 }

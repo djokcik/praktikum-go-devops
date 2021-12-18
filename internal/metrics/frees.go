@@ -1,17 +1,19 @@
 package metrics
 
-import "runtime"
+import (
+	"runtime"
+)
 
-type frees struct {
-	gaugeBaseMetric
+type Frees struct {
+	GaugeBaseMetric
 }
 
-func (a frees) Name() string {
+func (a Frees) Name() string {
 	return "Frees"
 }
 
-func (a frees) GetValue() interface{} {
+func (a Frees) GetValue() interface{} {
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
-	return gauge(memStats.Frees)
+	return Gauge(memStats.Frees)
 }

@@ -1,9 +1,11 @@
 package metrics
 
-import "runtime"
+import (
+	"runtime"
+)
 
 type alloc struct {
-	gaugeBaseMetric
+	GaugeBaseMetric
 }
 
 func (a alloc) Name() string {
@@ -13,5 +15,5 @@ func (a alloc) Name() string {
 func (a alloc) GetValue() interface{} {
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
-	return gauge(memStats.Alloc)
+	return Gauge(memStats.Alloc)
 }

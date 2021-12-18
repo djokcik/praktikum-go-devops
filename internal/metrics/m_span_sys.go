@@ -1,17 +1,19 @@
 package metrics
 
-import "runtime"
+import (
+	"runtime"
+)
 
-type mSpanSys struct {
-	gaugeBaseMetric
+type MSpanSys struct {
+	GaugeBaseMetric
 }
 
-func (a mSpanSys) Name() string {
+func (a MSpanSys) Name() string {
 	return "MSpanSys"
 }
 
-func (a mSpanSys) GetValue() interface{} {
+func (a MSpanSys) GetValue() interface{} {
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
-	return gauge(memStats.MSpanSys)
+	return Gauge(memStats.MSpanSys)
 }

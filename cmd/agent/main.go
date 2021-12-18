@@ -2,12 +2,12 @@ package main
 
 import (
 	"github.com/Jokcik/praktikum-go-devops/internal/agent"
-	metrics "github.com/Jokcik/praktikum-go-devops/internal/metrics"
+	"github.com/Jokcik/praktikum-go-devops/internal/agent/agentmetrics"
 )
 
 func main() {
-	var updatedMetric = make(map[string]metrics.Metric)
-	go agent.ReportMetricsToServer(&updatedMetric)
+	var updatedMetric = make(map[string]agentmetrics.AgentMetric)
+	go agent.ReportMetricsToServer(updatedMetric)
 
-	agent.CollectMetrics(&updatedMetric)
+	agent.CollectMetrics(updatedMetric)
 }
