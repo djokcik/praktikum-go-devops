@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	var updatedMetric = make(map[string]agentmetrics.AgentMetric)
+	var updatedMetric = make(map[string]agentmetrics.SendAgentMetric)
 	go agent.ReportMetricsToServer(updatedMetric)
 
 	agent.CollectMetrics(updatedMetric)

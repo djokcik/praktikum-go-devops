@@ -7,7 +7,7 @@ import (
 
 const pollInterval = 2
 
-func CollectMetrics(updatedMetric map[string]agentmetrics.AgentMetric) {
+func CollectMetrics(updatedMetric map[string]agentmetrics.SendAgentMetric) {
 	var availableMetrics = agentmetrics.GetAgentMetrics()
 	ticker := time.NewTicker(pollInterval * time.Second)
 
@@ -16,7 +16,7 @@ func CollectMetrics(updatedMetric map[string]agentmetrics.AgentMetric) {
 
 		for _, metric := range availableMetrics {
 			var name = metric.Name()
-			updatedMetric[name] = metric
+			updatedMetric[name] = agentmetrics.SendAgentMetric{Metric: metric, Value: metric.GetValue()}
 		}
 	}
 }

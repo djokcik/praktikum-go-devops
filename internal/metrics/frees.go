@@ -8,11 +8,11 @@ type Frees struct {
 	GaugeBaseMetric
 }
 
-func (a Frees) Name() string {
+func (a *Frees) Name() string {
 	return "Frees"
 }
 
-func (a Frees) GetValue() interface{} {
+func (a *Frees) GetValue() interface{} {
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
 	return Gauge(memStats.Frees)

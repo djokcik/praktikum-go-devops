@@ -8,11 +8,11 @@ type HeapAlloc struct {
 	GaugeBaseMetric
 }
 
-func (a HeapAlloc) Name() string {
+func (a *HeapAlloc) Name() string {
 	return "HeapAlloc"
 }
 
-func (a HeapAlloc) GetValue() interface{} {
+func (a *HeapAlloc) GetValue() interface{} {
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
 	return Gauge(memStats.HeapAlloc)

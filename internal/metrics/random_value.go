@@ -8,10 +8,10 @@ type randomValue struct {
 	GaugeBaseMetric
 }
 
-func (a randomValue) Name() string {
+func (a *randomValue) Name() string {
 	return "RandomValue"
 }
 
-func (a randomValue) GetValue() interface{} {
+func (a *randomValue) GetValue() interface{} {
 	return Gauge(rand.Float64())
 }

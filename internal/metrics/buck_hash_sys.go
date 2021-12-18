@@ -8,11 +8,11 @@ type BuckHashSys struct {
 	GaugeBaseMetric
 }
 
-func (a BuckHashSys) Name() string {
+func (a *BuckHashSys) Name() string {
 	return "BuckHashSys"
 }
 
-func (a BuckHashSys) GetValue() interface{} {
+func (a *BuckHashSys) GetValue() interface{} {
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
 

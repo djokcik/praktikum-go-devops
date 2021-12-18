@@ -8,11 +8,11 @@ type NumGC struct {
 	GaugeBaseMetric
 }
 
-func (a NumGC) Name() string {
+func (a *NumGC) Name() string {
 	return "NumGC"
 }
 
-func (a NumGC) GetValue() interface{} {
+func (a *NumGC) GetValue() interface{} {
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
 	return Gauge(memStats.NumGC)

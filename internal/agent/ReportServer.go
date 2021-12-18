@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func ReportMetricsToServer(updatedMetric map[string]agentmetrics.AgentMetric) {
+func ReportMetricsToServer(updatedMetric map[string]agentmetrics.SendAgentMetric) {
 	const reportInterval = 10
 	const host = "127.0.0.1"
 	const port = "8080"
@@ -19,8 +19,11 @@ func ReportMetricsToServer(updatedMetric map[string]agentmetrics.AgentMetric) {
 	for {
 		<-ticker.C
 
-		for _, metric := range updatedMetric {
-			url := fmt.Sprintf("http://%s:%s/update/%s/%s/%v", host, port, metric.Type(), metric.Name(), metric.GetValue())
+		for _, sendMetric := range updatedMetric {
+			metric := sendMetric.Metric
+			value := sendMetric.Value
+
+			url := fmt.Sprintf("http://%s:%s/update/%s/%s/%v", host, port, metric.Type(), metric.Name(), value)
 
 			req, err := http.NewRequest(http.MethodPost, url, nil)
 			if err != nil {

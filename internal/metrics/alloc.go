@@ -4,15 +4,15 @@ import (
 	"runtime"
 )
 
-type alloc struct {
+type Alloc struct {
 	GaugeBaseMetric
 }
 
-func (a alloc) Name() string {
+func (a *Alloc) Name() string {
 	return "Alloc"
 }
 
-func (a alloc) GetValue() interface{} {
+func (a *Alloc) GetValue() interface{} {
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
 	return Gauge(memStats.Alloc)
