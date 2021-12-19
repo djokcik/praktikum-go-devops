@@ -6,6 +6,8 @@ import (
 	"reflect"
 )
 
+//go:generate mockery --name=Repository
+
 type Repository interface {
 	Configure(db *model.Database)
 	Update(id interface{}, entity interface{}) (bool, error)

@@ -18,6 +18,7 @@ func GaugeHandler(repository storage.Repository) http.HandlerFunc {
 			if err != nil {
 				fmt.Printf("Error %v", err)
 				http.Error(rw, "invalid value", http.StatusBadRequest)
+				return
 			}
 
 			_, err = repository.Update(name, metrics.Gauge(parseValue))

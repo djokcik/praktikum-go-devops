@@ -1,22 +1,23 @@
 package agent
 
 import (
-	"github.com/Jokcik/praktikum-go-devops/internal/agent/agentmetrics"
 	"time"
 )
 
 const pollInterval = 2
 
-func CollectMetrics(updatedMetric map[string]agentmetrics.SendAgentMetric) {
-	var availableMetrics = agentmetrics.GetAgentMetrics()
+func CollectMetrics(updatedMetric map[string]SendAgentMetric) {
+	var availableMetrics = GetAgentMetrics()
 	ticker := time.NewTicker(pollInterval * time.Second)
 
-	for {
-		<-ticker.C
+	for range ticker.C {
+		updateMetrics(updatedMetric, availableMetrics)
+	}
+}
 
-		for _, metric := range availableMetrics {
-			var name = metric.Name()
-			updatedMetric[name] = agentmetrics.SendAgentMetric{Metric: metric, Value: metric.GetValue()}
-		}
+func updateMetrics(updatedMetric map[string]SendAgentMetric, availableMetrics []AgentMetric) {
+	for _, metric := range availableMetrics {
+		var name = metric.Name()
+		updatedMetric[name] = SendAgentMetric{Metric: metric, Value: metric.GetValue()}
 	}
 }

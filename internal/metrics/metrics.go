@@ -1,5 +1,7 @@
 package metrics
 
+//go:generate mockery --name=Metric
+
 type Gauge float64
 type Counter int64
 
@@ -54,6 +56,7 @@ func GetGaugesMetrics() []Metric {
 		new(StackInuse),
 		new(StackSys),
 		new(Sys),
+		new(RandomValue),
 	}
 }
 

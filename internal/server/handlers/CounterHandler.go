@@ -19,9 +19,13 @@ func CounterHandler(repository storage.Repository) http.HandlerFunc {
 			if err != nil {
 				fmt.Printf("Error %v", err)
 				http.Error(rw, "invalid value", http.StatusBadRequest)
+				return
 			}
 
-			repository.Update(name, metrics.Counter(parseValue))
+			_, err = repository.Update(name, metrics.Counter(parseValue))
+			if err != nil {
+				http.Error(rw, "invalid save metrics", http.StatusBadRequest)
+			}
 		}
 
 		MetricHandler(counterMetric, parseAndSaveValueFunc)(rw, r)

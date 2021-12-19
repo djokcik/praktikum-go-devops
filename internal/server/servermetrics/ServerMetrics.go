@@ -1,6 +1,8 @@
 package servermetrics
 
-import "github.com/Jokcik/praktikum-go-devops/internal/metrics"
+import (
+	"github.com/Jokcik/praktikum-go-devops/internal/metrics"
+)
 
 type ServerMapMetrics map[string]metrics.Metric
 

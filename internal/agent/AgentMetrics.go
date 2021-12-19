@@ -1,8 +1,10 @@
-package agentmetrics
+package agent
 
 import (
 	"github.com/Jokcik/praktikum-go-devops/internal/metrics"
 )
+
+//go:generate mockery --name=AgentMetric
 
 type SendAgentMetric struct {
 	Metric metrics.Metric
@@ -43,6 +45,7 @@ func GetAgentMetrics() []AgentMetric {
 		new(metrics.StackInuse),
 		new(metrics.StackSys),
 		new(metrics.Sys),
+		new(metrics.RandomValue),
 
 		// Counter
 		new(metrics.PollCount),

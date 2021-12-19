@@ -4,14 +4,14 @@ import (
 	"math/rand"
 )
 
-type randomValue struct {
+type RandomValue struct {
 	GaugeBaseMetric
 }
 
-func (a *randomValue) Name() string {
+func (a *RandomValue) Name() string {
 	return "RandomValue"
 }
 
-func (a *randomValue) GetValue() interface{} {
+func (a *RandomValue) GetValue() interface{} {
 	return Gauge(rand.Float64())
 }

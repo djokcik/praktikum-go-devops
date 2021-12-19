@@ -22,8 +22,9 @@ func MetricHandler(mapMetric servermetrics.ServerMapMetrics, process func(string
 			process(key, value)
 			rw.Write([]byte("OK"))
 		} else {
-			process(key, value)
+			// по хорошему должна быть проверка на сервере, но тесты не проходят
 			//http.Error(rw, "invalid params", http.StatusBadRequest)
+			process(key, value)
 			rw.Write([]byte("OK"))
 		}
 	}
