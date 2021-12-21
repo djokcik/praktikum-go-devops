@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/Jokcik/praktikum-go-devops/internal/metric"
 	"github.com/go-chi/chi/v5"
 	"net/http"
@@ -13,6 +14,8 @@ func (h *Handler) GaugeHandler() http.HandlerFunc {
 		metricValue := chi.URLParam(r, "value")
 
 		parseValue, err := strconv.ParseFloat(metricValue, 64)
+
+		fmt.Println("SAVE GAUGE", metricValue, metricType)
 		if err != nil {
 			http.Error(rw, "invalid value", http.StatusBadRequest)
 			return

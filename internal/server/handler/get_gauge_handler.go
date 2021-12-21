@@ -12,7 +12,7 @@ func (h *Handler) GetGaugeHandler() http.HandlerFunc {
 		metricType := chi.URLParam(r, "name")
 
 		metricValue, err := h.Repo.Get(metricType)
-		println(metricValue)
+		fmt.Println("GAUGE", metricType, metricValue)
 		if err != nil {
 			http.Error(rw, err.Error(), http.StatusNotFound)
 			return

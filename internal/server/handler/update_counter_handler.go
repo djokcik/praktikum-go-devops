@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/Jokcik/praktikum-go-devops/internal/metric"
 	"github.com/go-chi/chi/v5"
 	"net/http"
@@ -14,6 +15,7 @@ func (h *Handler) CounterHandler() http.HandlerFunc {
 
 		parseValue, err := strconv.ParseInt(metricValue, 10, 64)
 
+		fmt.Println("SAVE COUNTER", metricValue, metricType)
 		if err != nil {
 			http.Error(rw, "invalid value", http.StatusBadRequest)
 			rw.Write([]byte("invalid value"))
