@@ -11,6 +11,8 @@ import (
 type Repository interface {
 	Configure(db *model.Database)
 	Update(id interface{}, entity interface{}) (bool, error)
+	List() (interface{}, error)
+	Get(metricType string) (interface{}, error)
 }
 
 type BaseRepository struct {

@@ -17,6 +17,52 @@ func (_m *Repository) Configure(db *model.Database) {
 	_m.Called(db)
 }
 
+// Get provides a mock function with given fields: metricType
+func (_m *Repository) Get(metricType string) (interface{}, error) {
+	ret := _m.Called(metricType)
+
+	var r0 interface{}
+	if rf, ok := ret.Get(0).(func(string) interface{}); ok {
+		r0 = rf(metricType)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(interface{})
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(metricType)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// List provides a mock function with given fields:
+func (_m *Repository) List() (interface{}, error) {
+	ret := _m.Called()
+
+	var r0 interface{}
+	if rf, ok := ret.Get(0).(func() interface{}); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(interface{})
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Update provides a mock function with given fields: id, entity
 func (_m *Repository) Update(id interface{}, entity interface{}) (bool, error) {
 	ret := _m.Called(id, entity)

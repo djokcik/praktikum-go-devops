@@ -1,53 +1,52 @@
 package agent
 
 import (
-	"github.com/Jokcik/praktikum-go-devops/internal/metrics"
+	"github.com/Jokcik/praktikum-go-devops/internal/metric"
 )
 
 //go:generate mockery --name=AgentMetric
 
 type SendAgentMetric struct {
-	Metric metrics.Metric
+	Metric metric.Metric
 	Value  interface{}
 }
 
 type AgentMetric interface {
-	Type() string
-	Name() string
+	metric.Metric
 	GetValue() interface{}
 }
 
 func GetAgentMetrics() []AgentMetric {
 	return []AgentMetric{
 		// gauges
-		new(metrics.Alloc),
-		new(metrics.BuckHashSys),
-		new(metrics.Frees),
-		new(metrics.GCSys),
-		new(metrics.GCCPUFraction),
-		new(metrics.HeapAlloc),
-		new(metrics.HeapIdle),
-		new(metrics.HeapInuse),
-		new(metrics.HeapObjects),
-		new(metrics.HeapReleased),
-		new(metrics.HeapSys),
-		new(metrics.LastGC),
-		new(metrics.Lookups),
-		new(metrics.MCacheInuse),
-		new(metrics.MCacheSys),
-		new(metrics.MSpanInuse),
-		new(metrics.MSpanSys),
-		new(metrics.NextGC),
-		new(metrics.NumForcedGC),
-		new(metrics.NumGC),
-		new(metrics.OtherSys),
-		new(metrics.PauseTotalNs),
-		new(metrics.StackInuse),
-		new(metrics.StackSys),
-		new(metrics.Sys),
-		new(metrics.RandomValue),
+		new(metric.Alloc),
+		new(metric.BuckHashSys),
+		new(metric.Frees),
+		new(metric.GCSys),
+		new(metric.GCCPUFraction),
+		new(metric.HeapAlloc),
+		new(metric.HeapIdle),
+		new(metric.HeapInuse),
+		new(metric.HeapObjects),
+		new(metric.HeapReleased),
+		new(metric.HeapSys),
+		new(metric.LastGC),
+		new(metric.Lookups),
+		new(metric.MCacheInuse),
+		new(metric.MCacheSys),
+		new(metric.MSpanInuse),
+		new(metric.MSpanSys),
+		new(metric.NextGC),
+		new(metric.NumForcedGC),
+		new(metric.NumGC),
+		new(metric.OtherSys),
+		new(metric.PauseTotalNs),
+		new(metric.StackInuse),
+		new(metric.StackSys),
+		new(metric.Sys),
+		new(metric.RandomValue),
 
 		// Counter
-		new(metrics.PollCount),
+		new(metric.PollCount),
 	}
 }
