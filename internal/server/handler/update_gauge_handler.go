@@ -2,7 +2,6 @@ package handler
 
 import (
 	"github.com/Jokcik/praktikum-go-devops/internal/metric"
-	"github.com/Jokcik/praktikum-go-devops/internal/server/storage"
 	"github.com/go-chi/chi/v5"
 	"net/http"
 	"strconv"
@@ -20,13 +19,7 @@ func (h *Handler) GaugeHandler() http.HandlerFunc {
 			return
 		}
 
-		val, _ := h.Repo.Get(storage.GetRepositoryFilter{
-			Name:         metricName,
-			Type:         metric.GaugeType,
-			DefaultValue: metric.Gauge(0),
-		})
-
-		_, err = h.Repo.Update(metricName, val.(metric.Gauge)+metric.Gauge(parseValue))
+		_, err = h.Repo.Update(metricName, metric.Gauge(parseValue))
 		if err != nil {
 			http.Error(rw, "invalid save metric", http.StatusBadRequest)
 			return
