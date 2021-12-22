@@ -10,7 +10,7 @@ type MetricRepository struct {
 }
 
 func (r *MetricRepository) Update(name interface{}, value interface{}) (bool, error) {
-	// TODO подключить БД и запрос должен быть проще
+	// TODO use db that code will be more simply
 	switch metricValue := value.(type) {
 	default:
 		return false, fmt.Errorf("entity could`t convert `%v` into available metric type", value)
@@ -26,7 +26,7 @@ func (r *MetricRepository) Update(name interface{}, value interface{}) (bool, er
 func (r *MetricRepository) List(filter ListRepositoryFilter) (interface{}, error) {
 	var metricList []metric.Metric
 
-	// TODO подключить БД и запрос должен быть проще
+	// TODO use db that code will be more simply
 	switch filter.Type {
 	default:
 		return nil, fmt.Errorf("type `%v` isn`t avalilable metric type", filter.Type)
@@ -48,7 +48,7 @@ func (r *MetricRepository) Get(filter GetRepositoryFilter) (interface{}, error) 
 	var value interface{}
 	var ok bool
 
-	// TODO подключить БД и запрос должен быть проще
+	// TODO use db that code will be more simply
 	switch metricType {
 	default:
 		return nil, fmt.Errorf("type `%v` isn`t avalilable metric type", filter.Type)

@@ -2,9 +2,7 @@ package agent
 
 import (
 	metric2 "github.com/Jokcik/praktikum-go-devops/internal/agent/metric"
-	"math/rand"
 	"net/http"
-	"time"
 )
 
 //go:generate mockery --name=AgentMetric
@@ -20,8 +18,6 @@ func NewAgent() *agent {
 	agent.CollectedMetric = make(map[string]SendAgentMetric)
 	agent.Client = &http.Client{}
 	agent.metrics = GetAgentMetrics()
-
-	rand.Seed(time.Now().UnixNano())
 
 	return agent
 }
