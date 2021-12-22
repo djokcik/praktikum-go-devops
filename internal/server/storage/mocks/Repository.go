@@ -3,6 +3,7 @@
 package mocks
 
 import (
+	storage "github.com/Jokcik/praktikum-go-devops/internal/server/storage"
 	model "github.com/Jokcik/praktikum-go-devops/internal/server/storage/model"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -17,13 +18,13 @@ func (_m *Repository) Configure(db *model.Database) {
 	_m.Called(db)
 }
 
-// Get provides a mock function with given fields: metricType
-func (_m *Repository) Get(metricType string) (interface{}, error) {
-	ret := _m.Called(metricType)
+// Get provides a mock function with given fields: filter
+func (_m *Repository) Get(filter storage.GetRepositoryFilter) (interface{}, error) {
+	ret := _m.Called(filter)
 
 	var r0 interface{}
-	if rf, ok := ret.Get(0).(func(string) interface{}); ok {
-		r0 = rf(metricType)
+	if rf, ok := ret.Get(0).(func(storage.GetRepositoryFilter) interface{}); ok {
+		r0 = rf(filter)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(interface{})
@@ -31,8 +32,8 @@ func (_m *Repository) Get(metricType string) (interface{}, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(metricType)
+	if rf, ok := ret.Get(1).(func(storage.GetRepositoryFilter) error); ok {
+		r1 = rf(filter)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -40,13 +41,13 @@ func (_m *Repository) Get(metricType string) (interface{}, error) {
 	return r0, r1
 }
 
-// List provides a mock function with given fields:
-func (_m *Repository) List() (interface{}, error) {
-	ret := _m.Called()
+// List provides a mock function with given fields: filter
+func (_m *Repository) List(filter storage.ListRepositoryFilter) (interface{}, error) {
+	ret := _m.Called(filter)
 
 	var r0 interface{}
-	if rf, ok := ret.Get(0).(func() interface{}); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(storage.ListRepositoryFilter) interface{}); ok {
+		r0 = rf(filter)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(interface{})
@@ -54,8 +55,8 @@ func (_m *Repository) List() (interface{}, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
+	if rf, ok := ret.Get(1).(func(storage.ListRepositoryFilter) error); ok {
+		r1 = rf(filter)
 	} else {
 		r1 = ret.Error(1)
 	}

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>List metrics</title>
+</head>
+<body>
+{{ if len .CounterMetrics }}
+<div>Counter:
+    <ul>
+        <li>
+            {{range .CounterMetrics}}
+            <div>Name: {{.Name}}</div>
+            <div>Value: {{.Value}}</div>
+            <a href="http://localhost:8080/value/counter/{{.Name}}" target="_blank">Get value</a>
+            {{end}}
+        </li>
+    </ul>
+</div>
+{{ end }}
+
+{{ if len .GaugeMetrics }}
+<div>Gauges:
+
+</div>
+{{ end }}
+
+</body>
+</html>

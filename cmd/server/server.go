@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"github.com/Jokcik/praktikum-go-devops/internal/server/handler"
 	"github.com/Jokcik/praktikum-go-devops/internal/server/storage"
 	"github.com/Jokcik/praktikum-go-devops/internal/server/storage/model"
 	"github.com/go-chi/chi/v5"
+	"log"
 	"net/http"
 )
 
@@ -13,7 +13,7 @@ func makeMetricRoutes(mux *chi.Mux) *handler.Handler {
 	rr := storage.NewRepositoryRegistry(new(model.Database), &storage.MetricRepository{})
 	metricRepository, err := rr.Repository("MetricRepository")
 	if err != nil {
-		fmt.Println("Error provide repository 'MetricRepository'")
+		log.Println("Error provide repository 'MetricRepository'")
 	}
 
 	h := handler.NewHandler(mux, metricRepository)
@@ -29,8 +29,7 @@ func makeMetricRoutes(mux *chi.Mux) *handler.Handler {
 	})
 
 	h.Route("/value", func(r chi.Router) {
-		r.Get("/counter/{name}", h.GetCounterHandler())
-		r.Get("/gauge/{name}", h.GetGaugeHandler())
+		r.Get("/{type}/{name}", h.GetMetricHandler())
 		r.Get("/*", http.NotFound)
 	})
 
