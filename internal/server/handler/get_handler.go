@@ -2,8 +2,8 @@ package handler
 
 import (
 	"fmt"
-	"github.com/Jokcik/praktikum-go-devops/internal/metric"
-	"github.com/Jokcik/praktikum-go-devops/internal/server/storage"
+	"github.com/djokcik/praktikum-go-devops/internal/metric"
+	"github.com/djokcik/praktikum-go-devops/internal/server/storage"
 	"github.com/go-chi/chi/v5"
 	"net/http"
 	"strconv"

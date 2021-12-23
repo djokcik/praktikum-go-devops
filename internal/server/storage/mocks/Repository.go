@@ -3,8 +3,8 @@
 package mocks
 
 import (
-	storage "github.com/Jokcik/praktikum-go-devops/internal/server/storage"
-	model "github.com/Jokcik/praktikum-go-devops/internal/server/storage/model"
+	storage "github.com/djokcik/praktikum-go-devops/internal/server/storage"
+	model "github.com/djokcik/praktikum-go-devops/internal/server/storage/model"
 	mock "github.com/stretchr/testify/mock"
 )
 

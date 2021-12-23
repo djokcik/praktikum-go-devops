@@ -1,6 +1,6 @@
 package metric
 
-import "github.com/Jokcik/praktikum-go-devops/internal/metric"
+import "github.com/djokcik/praktikum-go-devops/internal/metric"
 
 type PollCount struct {
 	metric.CounterBaseMetric

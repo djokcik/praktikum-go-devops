@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/Jokcik/praktikum-go-devops/internal/server/handler"
-	"github.com/Jokcik/praktikum-go-devops/internal/server/storage"
-	"github.com/Jokcik/praktikum-go-devops/internal/server/storage/model"
+	"github.com/djokcik/praktikum-go-devops/internal/server/handler"
+	"github.com/djokcik/praktikum-go-devops/internal/server/storage"
+	"github.com/djokcik/praktikum-go-devops/internal/server/storage/model"
 	"github.com/go-chi/chi/v5"
 	"log"
 	"net/http"

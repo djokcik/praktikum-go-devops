@@ -2,7 +2,7 @@ package storage
 
 import (
 	"fmt"
-	"github.com/Jokcik/praktikum-go-devops/internal/metric"
+	"github.com/djokcik/praktikum-go-devops/internal/metric"
 )
 
 type MetricRepository struct {
@@ -10,6 +10,9 @@ type MetricRepository struct {
 }
 
 func (r *MetricRepository) Update(name interface{}, value interface{}) (bool, error) {
+	r.db.Lock()
+	defer r.db.Unlock()
+
 	// TODO use db that code will be more simply
 	switch metricValue := value.(type) {
 	default:

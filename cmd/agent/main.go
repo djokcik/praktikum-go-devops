@@ -1,19 +1,22 @@
 package main
 
 import (
-	"github.com/Jokcik/praktikum-go-devops/internal/agent"
-	"github.com/Jokcik/praktikum-go-devops/internal/helpers"
+	"context"
+	"github.com/djokcik/praktikum-go-devops/internal/agent"
+	"github.com/djokcik/praktikum-go-devops/internal/helpers"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
-const reportInterval = 10
-const pollInterval = 2
+const reportInterval = 10 * time.Second
+const pollInterval = 2 * time.Second
 
 func main() {
-	metricAgent := agent.NewAgent()
+	ctx, cancel := context.WithCancel(context.Background())
+	metricAgent := agent.NewAgent(ctx)
 
 	go helpers.SetTicker(metricAgent.CollectMetrics, pollInterval)
 	go helpers.SetTicker(metricAgent.SendToServer, reportInterval)
@@ -23,4 +26,6 @@ func main() {
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	<-quit
 	log.Println("Shutdown Agent ...")
+
+	cancel()
 }

@@ -1,7 +1,8 @@
 package agent
 
 import (
-	"github.com/Jokcik/praktikum-go-devops/internal/agent/metric"
+	"context"
+	"github.com/djokcik/praktikum-go-devops/internal/agent/metric"
 	"net/http"
 )
 
@@ -11,13 +12,15 @@ type agent struct {
 	CollectedMetric map[string]SendAgentMetric
 	Client          *http.Client
 	metrics         []AgentMetric
+	Ctx             context.Context
 }
 
-func NewAgent() *agent {
+func NewAgent(ctx context.Context) *agent {
 	agent := new(agent)
 	agent.CollectedMetric = make(map[string]SendAgentMetric)
 	agent.Client = &http.Client{}
 	agent.metrics = GetAgentMetrics()
+	agent.Ctx = ctx
 
 	return agent
 }

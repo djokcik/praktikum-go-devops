@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"context"
 	"github.com/stretchr/testify/require"
 	"log"
 	"net"
@@ -11,7 +12,7 @@ import (
 
 func TestSendToServer(t *testing.T) {
 	t.Run("Should send metrics to server", func(t *testing.T) {
-		metricAgent := NewAgent()
+		metricAgent := NewAgent(context.Background())
 
 		collectedMap := make(map[string]SendAgentMetric)
 		collectedMap["TestMetric"] = SendAgentMetric{Name: "TestMetric", Type: "TestType", Value: "TestValue"}

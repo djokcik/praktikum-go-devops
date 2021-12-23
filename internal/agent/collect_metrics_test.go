@@ -1,7 +1,8 @@
 package agent
 
 import (
-	"github.com/Jokcik/praktikum-go-devops/internal/agent/mocks"
+	"context"
+	"github.com/djokcik/praktikum-go-devops/internal/agent/mocks"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -9,7 +10,7 @@ import (
 
 func Test_updateMetrics(f *testing.T) {
 	f.Run("Should update mapMetrics from metrics", func(t *testing.T) {
-		metricAgent := NewAgent()
+		metricAgent := NewAgent(context.Background())
 
 		m := mocks.AgentMetric{Mock: mock.Mock{}}
 		m.On("Name").Return("TestName")

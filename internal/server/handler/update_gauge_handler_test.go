@@ -2,8 +2,8 @@ package handler
 
 import (
 	"errors"
-	"github.com/Jokcik/praktikum-go-devops/internal/metric"
-	"github.com/Jokcik/praktikum-go-devops/internal/server/storage/mocks"
+	"github.com/djokcik/praktikum-go-devops/internal/metric"
+	"github.com/djokcik/praktikum-go-devops/internal/server/storage/mocks"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

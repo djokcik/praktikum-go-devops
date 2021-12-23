@@ -1,7 +1,7 @@
 package metric
 
 import (
-	"github.com/Jokcik/praktikum-go-devops/internal/metric"
+	"github.com/djokcik/praktikum-go-devops/internal/metric"
 	"math/rand"
 	"time"
 )

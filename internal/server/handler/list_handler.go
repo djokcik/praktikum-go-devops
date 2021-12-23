@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"github.com/Jokcik/praktikum-go-devops/internal/metric"
-	"github.com/Jokcik/praktikum-go-devops/internal/server/storage"
+	"github.com/djokcik/praktikum-go-devops/internal/metric"
+	"github.com/djokcik/praktikum-go-devops/internal/server/storage"
 	"html/template"
 	"log"
 	"net/http"

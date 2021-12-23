@@ -21,7 +21,15 @@
 
 {{ if len .GaugeMetrics }}
 <div>Gauges:
-
+    <ul>
+        <li>
+            {{range .GaugeMetrics}}
+            <div>Name: {{.Name}}</div>
+            <div>Value: {{.Value}}</div>
+            <a href="http://localhost:8080/value/gauge/{{.Name}}" target="_blank">Get value</a>
+            {{end}}
+        </li>
+    </ul>
 </div>
 {{ end }}
 

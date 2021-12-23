@@ -2,8 +2,8 @@ package storage
 
 import (
 	"fmt"
-	"github.com/Jokcik/praktikum-go-devops/internal/metric"
-	"github.com/Jokcik/praktikum-go-devops/internal/server/storage/model"
+	"github.com/djokcik/praktikum-go-devops/internal/metric"
+	"github.com/djokcik/praktikum-go-devops/internal/server/storage/model"
 	"reflect"
 )
 
