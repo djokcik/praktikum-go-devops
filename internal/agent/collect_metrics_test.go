@@ -21,7 +21,7 @@ func Test_updateMetrics(f *testing.T) {
 		metricAgent.metrics = []AgentMetric{&m}
 		metricAgent.CollectedMetric = collectedMetric
 
-		metricAgent.CollectMetrics()
+		metricAgent.CollectMetrics(context.Background())()
 
 		m.AssertNumberOfCalls(t, "Name", 1)
 		m.AssertNumberOfCalls(t, "Type", 1)

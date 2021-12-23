@@ -20,8 +20,8 @@ func main() {
 
 	metricAgent := agent.NewAgent(ctx)
 
-	go helpers.SetTicker(metricAgent.CollectMetrics, pollInterval)
-	go helpers.SetTicker(metricAgent.SendToServer, reportInterval)
+	go helpers.SetTicker(metricAgent.CollectMetrics(ctx), pollInterval)
+	go helpers.SetTicker(metricAgent.SendToServer(ctx), reportInterval)
 
 	quit := make(chan os.Signal, 1)
 

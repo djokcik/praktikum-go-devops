@@ -43,6 +43,6 @@ func TestSendToServer(t *testing.T) {
 		// Close the server when test finishes
 		defer ts.Close()
 
-		metricAgent.SendToServer()
+		metricAgent.SendToServer(context.Background())()
 	})
 }
