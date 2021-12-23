@@ -16,6 +16,8 @@ const pollInterval = 2 * time.Second
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	metricAgent := agent.NewAgent(ctx)
 
 	go helpers.SetTicker(metricAgent.CollectMetrics, pollInterval)
@@ -26,6 +28,4 @@ func main() {
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	<-quit
 	log.Println("Shutdown Agent ...")
-
-	cancel()
 }
