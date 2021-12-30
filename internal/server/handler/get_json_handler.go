@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func (h *Handler) UpdateJSONHandler() http.HandlerFunc {
+func (h *Handler) GetJSONHandler() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		decoder := json.NewDecoder(r.Body)
 
@@ -23,17 +23,20 @@ func (h *Handler) UpdateJSONHandler() http.HandlerFunc {
 			http.Error(rw, fmt.Sprintf("unknown type metric: %s", metricDto.MType), http.StatusBadRequest)
 			return
 		case metric.CounterType:
-			err = h.Counter.AddValue(metricDto.ID, metric.Counter(*metricDto.Delta))
+			val, _ := h.Counter.GetOne(metricDto.ID)
+			delta := int64(val)
+
+			metricDto.Delta = &delta
 		case metric.GaugeType:
-			_, err = h.Gauge.Update(metricDto.ID, metric.Gauge(*metricDto.Value))
+			val, _ := h.Gauge.GetOne(metricDto.ID)
+			value := float64(val)
+
+			metricDto.Value = &value
 		}
 
-		if err != nil {
-			// TODO: add log
-			http.Error(rw, "invalid save metric", http.StatusBadRequest)
-			return
-		}
+		rw.Header().Set("Content-Type", "application/json")
 
-		rw.Write([]byte("OK"))
+		bytes, _ := json.Marshal(metricDto)
+		rw.Write(bytes)
 	}
 }

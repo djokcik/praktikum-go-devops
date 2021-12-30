@@ -56,6 +56,8 @@ func GetAgentMetrics() []AgentMetric {
 		new(metric.MSpanInuse),
 		new(metric.MSpanSys),
 		new(metric.NextGC),
+		new(metric.TotalAlloc),
+		new(metric.Mallocs),
 		new(metric.NumForcedGC),
 		new(metric.NumGC),
 		new(metric.OtherSys),
