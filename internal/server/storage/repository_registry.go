@@ -10,9 +10,8 @@ import (
 //go:generate mockery --name=Repository
 
 type GetRepositoryFilter struct {
-	Type         string
-	Name         string
-	DefaultValue interface{}
+	Type string
+	Name string
 }
 
 type ListRepositoryFilter struct {
@@ -22,8 +21,8 @@ type ListRepositoryFilter struct {
 type Repository interface {
 	Configure(db *model.Database)
 	Update(id interface{}, entity interface{}) (bool, error)
-	List(filter ListRepositoryFilter) (interface{}, error)
-	Get(filter GetRepositoryFilter) (interface{}, error)
+	List(filter *ListRepositoryFilter) (interface{}, error)
+	Get(filter *GetRepositoryFilter) (interface{}, error)
 }
 
 type BaseRepository struct {

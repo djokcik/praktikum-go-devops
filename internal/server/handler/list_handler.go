@@ -2,7 +2,6 @@ package handler
 
 import (
 	"github.com/djokcik/praktikum-go-devops/internal/metric"
-	"github.com/djokcik/praktikum-go-devops/internal/server/storage"
 	"html/template"
 	"log"
 	"net/http"
@@ -15,13 +14,13 @@ func (h *Handler) ListHandler() http.HandlerFunc {
 	}
 
 	return func(rw http.ResponseWriter, r *http.Request) {
-		counterMetrics, err := h.Repo.List(storage.ListRepositoryFilter{Type: metric.CounterType})
+		counterMetrics, err := h.Counter.List()
 		if err != nil {
 			http.Error(rw, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		gaugeMetrics, err := h.Repo.List(storage.ListRepositoryFilter{Type: metric.GaugeType})
+		gaugeMetrics, err := h.Gauge.List()
 		if err != nil {
 			http.Error(rw, err.Error(), http.StatusInternalServerError)
 			return
@@ -35,8 +34,8 @@ func (h *Handler) ListHandler() http.HandlerFunc {
 		}
 
 		err = tmpl.Execute(rw, listTemplateData{
-			GaugeMetrics:   gaugeMetrics.([]metric.Metric),
-			CounterMetrics: counterMetrics.([]metric.Metric),
+			GaugeMetrics:   gaugeMetrics,
+			CounterMetrics: counterMetrics,
 		})
 
 		if err != nil {

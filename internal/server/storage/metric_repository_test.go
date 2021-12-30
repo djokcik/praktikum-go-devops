@@ -61,7 +61,7 @@ func TestMetricRepository_List(t *testing.T) {
 		db.GaugeMapMetric["TestGaugeName"] = metric.Gauge(0.123)
 		db.CounterMapMetric["TestCounterName"] = metric.Counter(123)
 
-		list, err := repository.List(ListRepositoryFilter{Type: metric.CounterType})
+		list, err := repository.List(&ListRepositoryFilter{Type: metric.CounterType})
 		if err != nil {
 			t.Errorf("error update repository: %v", err)
 		}
@@ -78,7 +78,7 @@ func TestMetricRepository_List(t *testing.T) {
 		db.GaugeMapMetric["TestGaugeName"] = metric.Gauge(0.123)
 		db.CounterMapMetric["TestCounterName"] = metric.Counter(123)
 
-		list, err := repository.List(ListRepositoryFilter{Type: metric.GaugeType})
+		list, err := repository.List(&ListRepositoryFilter{Type: metric.GaugeType})
 		if err != nil {
 			t.Errorf("error update repository: %v", err)
 		}
@@ -97,7 +97,7 @@ func TestMetricRepository_Get(t *testing.T) {
 		db.GaugeMapMetric["TestGaugeName"] = metric.Gauge(0.123)
 		db.CounterMapMetric["TestCounterName"] = metric.Counter(123)
 
-		val, err := repository.Get(GetRepositoryFilter{Type: metric.CounterType, Name: "TestCounterName"})
+		val, err := repository.Get(&GetRepositoryFilter{Type: metric.CounterType, Name: "TestCounterName"})
 		if err != nil {
 			t.Errorf("error update repository: %v", err)
 		}
@@ -105,23 +105,19 @@ func TestMetricRepository_Get(t *testing.T) {
 		require.Equal(t, val, metric.Counter(123))
 	})
 
-	t.Run("2. Should return default counter metric", func(t *testing.T) {
+	t.Run("2. Should return error when counter metric not found", func(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
 		repository.Configure(db)
 
-		val, err := repository.Get(GetRepositoryFilter{
-			Type:         metric.CounterType,
-			Name:         "TestCounterName",
-			DefaultValue: metric.Counter(123),
+		val, err := repository.Get(&GetRepositoryFilter{
+			Type: metric.CounterType,
+			Name: "TestCounterName",
 		})
 
-		if err != nil {
-			t.Errorf("error update repository: %v", err)
-		}
-
-		require.Equal(t, val, metric.Counter(123))
+		require.Equal(t, val, 0)
+		require.Equal(t, err.Error(), ValueNotFound)
 	})
 
 	t.Run("2. Should return gauge metric", func(t *testing.T) {
@@ -133,7 +129,7 @@ func TestMetricRepository_Get(t *testing.T) {
 		db.GaugeMapMetric["TestGaugeName"] = metric.Gauge(0.123)
 		db.CounterMapMetric["TestCounterName"] = metric.Counter(123)
 
-		val, err := repository.Get(GetRepositoryFilter{Type: metric.GaugeType, Name: "TestGaugeName"})
+		val, err := repository.Get(&GetRepositoryFilter{Type: metric.GaugeType, Name: "TestGaugeName"})
 		if err != nil {
 			t.Errorf("error update repository: %v", err)
 		}
@@ -147,16 +143,12 @@ func TestMetricRepository_Get(t *testing.T) {
 		repository := new(MetricRepository)
 		repository.Configure(db)
 
-		val, err := repository.Get(GetRepositoryFilter{
-			Type:         metric.GaugeType,
-			Name:         "TestGaugeName",
-			DefaultValue: metric.Gauge(0.123),
+		val, err := repository.Get(&GetRepositoryFilter{
+			Type: metric.GaugeType,
+			Name: "TestGaugeName",
 		})
 
-		if err != nil {
-			t.Errorf("error update repository: %v", err)
-		}
-
-		require.Equal(t, val, metric.Gauge(0.123))
+		require.Equal(t, val, 0)
+		require.Equal(t, err.Error(), ValueNotFound)
 	})
 }

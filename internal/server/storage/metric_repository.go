@@ -5,6 +5,10 @@ import (
 	"github.com/djokcik/praktikum-go-devops/internal/metric"
 )
 
+const (
+	ValueNotFound = "value.not.found"
+)
+
 type MetricRepository struct {
 	BaseRepository
 }
@@ -26,7 +30,7 @@ func (r *MetricRepository) Update(name interface{}, value interface{}) (bool, er
 	return true, nil
 }
 
-func (r *MetricRepository) List(filter ListRepositoryFilter) (interface{}, error) {
+func (r *MetricRepository) List(filter *ListRepositoryFilter) (interface{}, error) {
 	var metricList []metric.Metric
 
 	// TODO use db that code will be more simply
@@ -46,7 +50,7 @@ func (r *MetricRepository) List(filter ListRepositoryFilter) (interface{}, error
 	return metricList, nil
 }
 
-func (r *MetricRepository) Get(filter GetRepositoryFilter) (interface{}, error) {
+func (r *MetricRepository) Get(filter *GetRepositoryFilter) (interface{}, error) {
 	metricType := filter.Type
 	var value interface{}
 	var ok bool
@@ -58,22 +62,12 @@ func (r *MetricRepository) Get(filter GetRepositoryFilter) (interface{}, error) 
 	case metric.GaugeType:
 		value, ok = r.db.GaugeMapMetric[filter.Name]
 		if !ok {
-			switch defaultValue := filter.DefaultValue.(type) {
-			default:
-				return 0, fmt.Errorf("the metric name `%v` didn`t find as type gauge", filter.Name)
-			case metric.Gauge:
-				return defaultValue, nil
-			}
+			return 0, fmt.Errorf(ValueNotFound)
 		}
 	case metric.CounterType:
 		value, ok = r.db.CounterMapMetric[filter.Name]
 		if !ok {
-			switch defaultValue := filter.DefaultValue.(type) {
-			default:
-				return 0, fmt.Errorf("the metric name `%v` didn`t find as type counter", filter.Name)
-			case metric.Counter:
-				return defaultValue, nil
-			}
+			return 0, fmt.Errorf(ValueNotFound)
 		}
 	}
 

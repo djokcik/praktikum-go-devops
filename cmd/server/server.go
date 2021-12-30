@@ -21,6 +21,7 @@ func makeMetricRoutes(mux *chi.Mux) *handler.Handler {
 	h.Get("/", h.ListHandler())
 
 	h.Route("/update", func(r chi.Router) {
+		r.Post("/", handler.NotImplementedHandler)
 		r.Post("/counter/{name}/{value}", h.CounterHandler())
 		r.Post("/gauge/{name}/{value}", h.GaugeHandler())
 		r.Post("/counter/*", http.NotFound)
@@ -29,7 +30,8 @@ func makeMetricRoutes(mux *chi.Mux) *handler.Handler {
 	})
 
 	h.Route("/value", func(r chi.Router) {
-		r.Get("/{type}/{name}", h.GetMetricHandler())
+		r.Get("/counter/{name}", h.GetCounterMetricHandler())
+		r.Get("/gauge/{name}", h.GetGaugeMetricHandler())
 		r.Get("/*", http.NotFound)
 	})
 

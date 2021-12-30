@@ -19,11 +19,11 @@ func (_m *Repository) Configure(db *model.Database) {
 }
 
 // Get provides a mock function with given fields: filter
-func (_m *Repository) Get(filter storage.GetRepositoryFilter) (interface{}, error) {
+func (_m *Repository) Get(filter *storage.GetRepositoryFilter) (interface{}, error) {
 	ret := _m.Called(filter)
 
 	var r0 interface{}
-	if rf, ok := ret.Get(0).(func(storage.GetRepositoryFilter) interface{}); ok {
+	if rf, ok := ret.Get(0).(func(*storage.GetRepositoryFilter) interface{}); ok {
 		r0 = rf(filter)
 	} else {
 		if ret.Get(0) != nil {
@@ -32,7 +32,7 @@ func (_m *Repository) Get(filter storage.GetRepositoryFilter) (interface{}, erro
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(storage.GetRepositoryFilter) error); ok {
+	if rf, ok := ret.Get(1).(func(*storage.GetRepositoryFilter) error); ok {
 		r1 = rf(filter)
 	} else {
 		r1 = ret.Error(1)
@@ -42,11 +42,11 @@ func (_m *Repository) Get(filter storage.GetRepositoryFilter) (interface{}, erro
 }
 
 // List provides a mock function with given fields: filter
-func (_m *Repository) List(filter storage.ListRepositoryFilter) (interface{}, error) {
+func (_m *Repository) List(filter *storage.ListRepositoryFilter) (interface{}, error) {
 	ret := _m.Called(filter)
 
 	var r0 interface{}
-	if rf, ok := ret.Get(0).(func(storage.ListRepositoryFilter) interface{}); ok {
+	if rf, ok := ret.Get(0).(func(*storage.ListRepositoryFilter) interface{}); ok {
 		r0 = rf(filter)
 	} else {
 		if ret.Get(0) != nil {
@@ -55,7 +55,7 @@ func (_m *Repository) List(filter storage.ListRepositoryFilter) (interface{}, er
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(storage.ListRepositoryFilter) error); ok {
+	if rf, ok := ret.Get(1).(func(*storage.ListRepositoryFilter) error); ok {
 		r1 = rf(filter)
 	} else {
 		r1 = ret.Error(1)
