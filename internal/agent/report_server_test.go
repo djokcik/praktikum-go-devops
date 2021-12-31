@@ -14,14 +14,14 @@ import (
 
 func TestSendToServer(t *testing.T) {
 	t.Run("Should send metrics to server", func(t *testing.T) {
-		metricAgent := NewAgent(context.Background())
+		metricAgent := NewAgent(&Config{Address: "127.0.0.1:45555"})
 
 		collectedMap := make(map[string]SendAgentMetric)
 		collectedMap["TestMetric"] = SendAgentMetric{Name: "TestMetric", Type: "counter", Value: metric.Counter(10)}
 
 		metricAgent.CollectedMetric = collectedMap
 
-		l, err := net.Listen("tcp", "127.0.0.1:8080")
+		l, err := net.Listen("tcp", "127.0.0.1:45555")
 		if err != nil {
 			log.Fatal(err)
 		}

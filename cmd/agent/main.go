@@ -2,26 +2,29 @@ package main
 
 import (
 	"context"
+	"github.com/caarlos0/env/v6"
 	"github.com/djokcik/praktikum-go-devops/internal/agent"
 	"github.com/djokcik/praktikum-go-devops/internal/helpers"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 )
-
-const reportInterval = 10 * time.Second
-const pollInterval = 2 * time.Second
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	metricAgent := agent.NewAgent(ctx)
+	var cfg agent.Config
+	err := env.Parse(&cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	go helpers.SetTicker(metricAgent.CollectMetrics(ctx), pollInterval)
-	go helpers.SetTicker(metricAgent.SendToServer(ctx), reportInterval)
+	metricAgent := agent.NewAgent(&cfg)
+
+	go helpers.SetTicker(metricAgent.CollectMetrics(ctx), cfg.PollInterval)
+	go helpers.SetTicker(metricAgent.SendToServer(ctx), cfg.ReportInterval)
 
 	quit := make(chan os.Signal, 1)
 

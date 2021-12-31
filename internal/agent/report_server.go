@@ -10,9 +10,6 @@ import (
 	"net/http"
 )
 
-const host = "127.0.0.1"
-const port = "8080"
-
 func (a *agent) SendToServer(ctx context.Context) func() {
 	return func() {
 		for _, sendMetric := range a.CollectedMetric {
@@ -25,7 +22,7 @@ func (a *agent) SendToServer(ctx context.Context) func() {
 			metricType := sendMetric.Type
 			metricValue := sendMetric.Value
 
-			url := fmt.Sprintf("http://%s:%s/update/", host, port)
+			url := fmt.Sprintf("http://%s/update/", a.cfg.Address)
 
 			var metricDto metric.MetricsDto
 			switch metricType {

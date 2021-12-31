@@ -1,24 +1,32 @@
 package agent
 
 import (
-	"context"
 	"github.com/djokcik/praktikum-go-devops/internal/agent/metric"
 	"net/http"
+	"time"
 )
 
 //go:generate mockery --name=AgentMetric
+
+type Config struct {
+	Address        string        `env:"ADDRESS" envDefault:"127.0.0.1:8080"`
+	ReportInterval time.Duration `env:"REPORT_INTERVAL" envDefault:"10s"`
+	PollInterval   time.Duration `env:"POLL_INTERVAL" envDefault:"2s"`
+}
 
 type agent struct {
 	CollectedMetric map[string]SendAgentMetric
 	Client          *http.Client
 	metrics         []AgentMetric
+	cfg             *Config
 }
 
-func NewAgent(ctx context.Context) *agent {
+func NewAgent(cfg *Config) *agent {
 	agent := new(agent)
 	agent.CollectedMetric = make(map[string]SendAgentMetric)
 	agent.Client = &http.Client{}
 	agent.metrics = GetAgentMetrics()
+	agent.cfg = cfg
 
 	return agent
 }
