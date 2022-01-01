@@ -1,34 +1,47 @@
 package storage
 
 import (
+	"context"
 	"github.com/djokcik/praktikum-go-devops/internal/metric"
 	"github.com/djokcik/praktikum-go-devops/internal/server"
 	"github.com/djokcik/praktikum-go-devops/internal/server/storage/model"
+	"github.com/djokcik/praktikum-go-devops/internal/server/storage/store/mocks"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"sync"
 	"testing"
 )
 
 func TestMetricRepository_Update(t *testing.T) {
 	t.Run("1. Should update repository counter map", func(t *testing.T) {
+		mockStore := mocks.MetricStore{Mock: mock.Mock{}}
+		mockStore.On("NotifyUpdateDBValue").Return()
+
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.Configure(db, &server.Config{})
+		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, &server.Config{})
+		repository.Store = &mockStore
 
 		val, err := repository.Update("MetricName", metric.Counter(123))
 		if err != nil {
 			t.Errorf("error update repository: %v", err)
 		}
 
+		mockStore.AssertNumberOfCalls(t, "NotifyUpdateDBValue", 1)
 		require.Equal(t, val, true)
 		require.Equal(t, db.CounterMapMetric["MetricName"], metric.Counter(123))
 	})
 
 	t.Run("2. Should update repository gauge map", func(t *testing.T) {
+		mockStore := mocks.MetricStore{}
+		mockStore.On("NotifyUpdateDBValue")
+
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.Configure(db, &server.Config{})
+		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, &server.Config{})
+		repository.Store = &mockStore
 
 		val, err := repository.Update("MetricName", metric.Gauge(0.123))
 		if err != nil {
@@ -43,7 +56,7 @@ func TestMetricRepository_Update(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.Configure(db, &server.Config{})
+		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, &server.Config{})
 
 		val, err := repository.Update("MetricName", 123)
 
@@ -57,7 +70,7 @@ func TestMetricRepository_List(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.Configure(db, &server.Config{})
+		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, &server.Config{})
 
 		db.GaugeMapMetric["TestGaugeName"] = metric.Gauge(0.123)
 		db.CounterMapMetric["TestCounterName"] = metric.Counter(123)
@@ -74,7 +87,7 @@ func TestMetricRepository_List(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.Configure(db, &server.Config{})
+		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, &server.Config{})
 
 		db.GaugeMapMetric["TestGaugeName"] = metric.Gauge(0.123)
 		db.CounterMapMetric["TestCounterName"] = metric.Counter(123)
@@ -93,7 +106,7 @@ func TestMetricRepository_Get(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.Configure(db, &server.Config{})
+		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, &server.Config{})
 
 		db.GaugeMapMetric["TestGaugeName"] = metric.Gauge(0.123)
 		db.CounterMapMetric["TestCounterName"] = metric.Counter(123)
@@ -110,7 +123,7 @@ func TestMetricRepository_Get(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.Configure(db, &server.Config{})
+		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, &server.Config{})
 
 		val, err := repository.Get(&GetRepositoryFilter{
 			Type: metric.CounterType,
@@ -125,7 +138,7 @@ func TestMetricRepository_Get(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.Configure(db, &server.Config{})
+		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, &server.Config{})
 
 		db.GaugeMapMetric["TestGaugeName"] = metric.Gauge(0.123)
 		db.CounterMapMetric["TestCounterName"] = metric.Counter(123)
@@ -142,7 +155,7 @@ func TestMetricRepository_Get(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.Configure(db, &server.Config{})
+		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, &server.Config{})
 
 		val, err := repository.Get(&GetRepositoryFilter{
 			Type: metric.GaugeType,

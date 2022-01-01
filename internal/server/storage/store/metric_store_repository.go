@@ -1,6 +1,7 @@
-package storage
+package store
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/djokcik/praktikum-go-devops/internal/helpers"
@@ -9,10 +10,13 @@ import (
 	"github.com/djokcik/praktikum-go-devops/internal/server/storage/model"
 	"log"
 	"os"
+	"sync"
 )
 
+//go:generate mockery --name=MetricStore
+
 type MetricStore interface {
-	Configure()
+	Configure(ctx context.Context, wg *sync.WaitGroup)
 	NotifyUpdateDBValue()
 }
 
@@ -85,7 +89,7 @@ type MetricStoreFile struct {
 	FileWriter *metricFileStoreWriter
 }
 
-func (s *MetricStoreFile) Configure() {
+func (s *MetricStoreFile) Configure(ctx context.Context, wg *sync.WaitGroup) {
 	filename := s.Cfg.StoreFile
 	if filename == "" {
 		log.Printf("Save metrics to file are disabled")
@@ -112,6 +116,17 @@ func (s *MetricStoreFile) Configure() {
 	if s.Cfg.StoreInterval != 0 {
 		go helpers.SetTicker(s.SaveDBValue, s.Cfg.StoreInterval)
 	}
+
+	wg.Add(1)
+	go func() {
+		<-ctx.Done()
+		defer wg.Done()
+
+		s.SaveDBValue()
+
+		s.FileReader.Close()
+		s.FileWriter.Close()
+	}()
 }
 
 func (s *MetricStoreFile) NotifyUpdateDBValue() {
