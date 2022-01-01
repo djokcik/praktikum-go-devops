@@ -1,16 +1,27 @@
 package storage
 
 import (
+	"errors"
 	"fmt"
 	"github.com/djokcik/praktikum-go-devops/internal/metric"
+	"github.com/djokcik/praktikum-go-devops/internal/server"
+	"github.com/djokcik/praktikum-go-devops/internal/server/storage/model"
 )
 
-const (
-	ValueNotFound = "value.not.found"
+var (
+	ErrValueNotFound = errors.New("value not found")
 )
 
 type MetricRepository struct {
 	BaseRepository
+	Store MetricStore
+}
+
+func (r *MetricRepository) Configure(db *model.Database, cfg *server.Config) {
+	r.BaseRepository.Configure(db, cfg)
+
+	r.Store = &MetricStoreFile{DB: db, Cfg: cfg}
+	r.Store.Configure()
 }
 
 func (r *MetricRepository) Update(name interface{}, value interface{}) (bool, error) {
@@ -26,6 +37,8 @@ func (r *MetricRepository) Update(name interface{}, value interface{}) (bool, er
 	case metric.Gauge:
 		r.db.GaugeMapMetric[name.(string)] = metricValue
 	}
+
+	r.Store.NotifyUpdateDBValue()
 
 	return true, nil
 }
@@ -62,12 +75,12 @@ func (r *MetricRepository) Get(filter *GetRepositoryFilter) (interface{}, error)
 	case metric.GaugeType:
 		value, ok = r.db.GaugeMapMetric[filter.Name]
 		if !ok {
-			return 0, fmt.Errorf(ValueNotFound)
+			return 0, ErrValueNotFound
 		}
 	case metric.CounterType:
 		value, ok = r.db.CounterMapMetric[filter.Name]
 		if !ok {
-			return 0, fmt.Errorf(ValueNotFound)
+			return 0, ErrValueNotFound
 		}
 	}
 
