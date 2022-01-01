@@ -97,7 +97,7 @@ func TestCounterServiceImpl_AddValue(t *testing.T) {
 		m.On("Get", &storage.GetRepositoryFilter{
 			Name: "TestMetric",
 			Type: metric.CounterType,
-		}).Return(metric.Counter(0), errors.New(storage.ValueNotFound))
+		}).Return(metric.Counter(0), storage.ErrValueNotFound)
 
 		service := CounterServiceImpl{Repo: &m}
 		err := service.AddValue("TestMetric", 25)

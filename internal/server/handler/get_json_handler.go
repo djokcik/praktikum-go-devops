@@ -9,10 +9,8 @@ import (
 
 func (h *Handler) GetJSONHandler() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		decoder := json.NewDecoder(r.Body)
-
 		var metricDto metric.MetricsDto
-		err := decoder.Decode(&metricDto)
+		err := json.NewDecoder(r.Body).Decode(&metricDto)
 		if err != nil {
 			http.Error(rw, err.Error(), http.StatusBadRequest)
 			return

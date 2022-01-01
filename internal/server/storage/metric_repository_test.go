@@ -2,6 +2,7 @@ package storage
 
 import (
 	"github.com/djokcik/praktikum-go-devops/internal/metric"
+	"github.com/djokcik/praktikum-go-devops/internal/server"
 	"github.com/djokcik/praktikum-go-devops/internal/server/storage/model"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -12,7 +13,7 @@ func TestMetricRepository_Update(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.Configure(db)
+		repository.Configure(db, &server.Config{})
 
 		val, err := repository.Update("MetricName", metric.Counter(123))
 		if err != nil {
@@ -27,7 +28,7 @@ func TestMetricRepository_Update(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.Configure(db)
+		repository.Configure(db, &server.Config{})
 
 		val, err := repository.Update("MetricName", metric.Gauge(0.123))
 		if err != nil {
@@ -42,7 +43,7 @@ func TestMetricRepository_Update(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.Configure(db)
+		repository.Configure(db, &server.Config{})
 
 		val, err := repository.Update("MetricName", 123)
 
@@ -56,7 +57,7 @@ func TestMetricRepository_List(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.Configure(db)
+		repository.Configure(db, &server.Config{})
 
 		db.GaugeMapMetric["TestGaugeName"] = metric.Gauge(0.123)
 		db.CounterMapMetric["TestCounterName"] = metric.Counter(123)
@@ -73,7 +74,7 @@ func TestMetricRepository_List(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.Configure(db)
+		repository.Configure(db, &server.Config{})
 
 		db.GaugeMapMetric["TestGaugeName"] = metric.Gauge(0.123)
 		db.CounterMapMetric["TestCounterName"] = metric.Counter(123)
@@ -92,7 +93,7 @@ func TestMetricRepository_Get(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.Configure(db)
+		repository.Configure(db, &server.Config{})
 
 		db.GaugeMapMetric["TestGaugeName"] = metric.Gauge(0.123)
 		db.CounterMapMetric["TestCounterName"] = metric.Counter(123)
@@ -109,7 +110,7 @@ func TestMetricRepository_Get(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.Configure(db)
+		repository.Configure(db, &server.Config{})
 
 		val, err := repository.Get(&GetRepositoryFilter{
 			Type: metric.CounterType,
@@ -117,14 +118,14 @@ func TestMetricRepository_Get(t *testing.T) {
 		})
 
 		require.Equal(t, val, 0)
-		require.Equal(t, err.Error(), ValueNotFound)
+		require.Equal(t, err, ErrValueNotFound)
 	})
 
 	t.Run("2. Should return gauge metric", func(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.Configure(db)
+		repository.Configure(db, &server.Config{})
 
 		db.GaugeMapMetric["TestGaugeName"] = metric.Gauge(0.123)
 		db.CounterMapMetric["TestCounterName"] = metric.Counter(123)
@@ -141,7 +142,7 @@ func TestMetricRepository_Get(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.Configure(db)
+		repository.Configure(db, &server.Config{})
 
 		val, err := repository.Get(&GetRepositoryFilter{
 			Type: metric.GaugeType,
@@ -149,6 +150,6 @@ func TestMetricRepository_Get(t *testing.T) {
 		})
 
 		require.Equal(t, val, 0)
-		require.Equal(t, err.Error(), ValueNotFound)
+		require.Equal(t, err, ErrValueNotFound)
 	})
 }

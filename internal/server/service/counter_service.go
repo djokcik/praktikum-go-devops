@@ -50,7 +50,7 @@ func (s *CounterServiceImpl) AddValue(name string, value metric.Counter) error {
 	val, err := s.GetOne(name)
 
 	if err != nil {
-		if err.Error() != storage.ValueNotFound {
+		if !errors.Is(err, storage.ErrValueNotFound) {
 			return err
 		}
 	}
