@@ -1,11 +1,14 @@
 package storage
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/djokcik/praktikum-go-devops/internal/metric"
 	"github.com/djokcik/praktikum-go-devops/internal/server"
 	"github.com/djokcik/praktikum-go-devops/internal/server/storage/model"
+	"github.com/djokcik/praktikum-go-devops/internal/server/storage/store"
+	"sync"
 )
 
 var (
@@ -14,14 +17,14 @@ var (
 
 type MetricRepository struct {
 	BaseRepository
-	Store MetricStore
+	Store store.MetricStore
 }
 
-func (r *MetricRepository) Configure(db *model.Database, cfg *server.Config) {
-	r.BaseRepository.Configure(db, cfg)
+func (r *MetricRepository) Configure(ctx context.Context, wg *sync.WaitGroup, db *model.Database, cfg *server.Config) {
+	r.BaseRepository.Configure(ctx, wg, db, cfg)
 
-	r.Store = &MetricStoreFile{DB: db, Cfg: cfg}
-	r.Store.Configure()
+	r.Store = &store.MetricStoreFile{DB: db, Cfg: cfg}
+	r.Store.Configure(ctx, wg)
 }
 
 func (r *MetricRepository) Update(name interface{}, value interface{}) (bool, error) {

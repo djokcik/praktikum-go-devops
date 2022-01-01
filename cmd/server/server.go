@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"github.com/djokcik/praktikum-go-devops/internal/server"
 	"github.com/djokcik/praktikum-go-devops/internal/server/handler"
 	"github.com/djokcik/praktikum-go-devops/internal/server/storage"
@@ -8,10 +9,11 @@ import (
 	"github.com/go-chi/chi/v5"
 	"log"
 	"net/http"
+	"sync"
 )
 
-func makeMetricRoutes(mux *chi.Mux, cfg *server.Config) *handler.Handler {
-	rr := storage.NewRepositoryRegistry(cfg, new(model.Database), &storage.MetricRepository{})
+func makeMetricRoutes(ctx context.Context, wg *sync.WaitGroup, mux *chi.Mux, cfg *server.Config) *handler.Handler {
+	rr := storage.NewRepositoryRegistry(ctx, wg, cfg, new(model.Database), &storage.MetricRepository{})
 	metricRepository, err := rr.Repository("MetricRepository")
 	if err != nil {
 		log.Println("Error provide repository 'MetricRepository'")
