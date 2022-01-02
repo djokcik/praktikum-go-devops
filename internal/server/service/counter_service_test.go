@@ -84,7 +84,7 @@ func TestCounterServiceImpl_AddValue(t *testing.T) {
 		}).Return(metric.Counter(100), nil)
 
 		service := CounterServiceImpl{Repo: &m}
-		err := service.AddValue("TestMetric", 25)
+		err := service.Increase("TestMetric", 25)
 
 		m.AssertNumberOfCalls(t, "Update", 1)
 		m.AssertNumberOfCalls(t, "Get", 1)
@@ -100,7 +100,7 @@ func TestCounterServiceImpl_AddValue(t *testing.T) {
 		}).Return(metric.Counter(0), storage.ErrValueNotFound)
 
 		service := CounterServiceImpl{Repo: &m}
-		err := service.AddValue("TestMetric", 25)
+		err := service.Increase("TestMetric", 25)
 
 		m.AssertNumberOfCalls(t, "Update", 1)
 		m.AssertNumberOfCalls(t, "Get", 1)
@@ -116,7 +116,7 @@ func TestCounterServiceImpl_AddValue(t *testing.T) {
 		}).Return(metric.Counter(0), errors.New("TestError"))
 
 		service := CounterServiceImpl{Repo: &m}
-		err := service.AddValue("TestMetric", 25)
+		err := service.Increase("TestMetric", 25)
 
 		require.Equal(t, err, errors.New("TestError"))
 		m.AssertNumberOfCalls(t, "Get", 1)

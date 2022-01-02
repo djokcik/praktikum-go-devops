@@ -21,7 +21,7 @@ func (h *Handler) UpdateJSONHandler() http.HandlerFunc {
 			http.Error(rw, fmt.Sprintf("unknown type metric: %s", metricDto.MType), http.StatusBadRequest)
 			return
 		case metric.CounterType:
-			err = h.Counter.AddValue(metricDto.ID, metric.Counter(*metricDto.Delta))
+			err = h.Counter.Increase(metricDto.ID, metric.Counter(*metricDto.Delta))
 		case metric.GaugeType:
 			_, err = h.Gauge.Update(metricDto.ID, metric.Gauge(*metricDto.Value))
 		}

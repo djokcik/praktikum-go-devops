@@ -12,7 +12,7 @@ type CounterService interface {
 	GetOne(name string) (metric.Counter, error)
 	Update(name string, value metric.Counter) (bool, error)
 	List() ([]metric.Metric, error)
-	AddValue(name string, value metric.Counter) error
+	Increase(name string, value metric.Counter) error
 }
 
 type CounterServiceImpl struct {
@@ -46,7 +46,7 @@ func (s *CounterServiceImpl) List() ([]metric.Metric, error) {
 	return metrics.([]metric.Metric), nil
 }
 
-func (s *CounterServiceImpl) AddValue(name string, value metric.Counter) error {
+func (s *CounterServiceImpl) Increase(name string, value metric.Counter) error {
 	val, err := s.GetOne(name)
 
 	if err != nil {

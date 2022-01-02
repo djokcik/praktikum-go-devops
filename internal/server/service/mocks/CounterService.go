@@ -13,7 +13,7 @@ type CounterService struct {
 }
 
 // AddValue provides a mock function with given fields: name, value
-func (_m *CounterService) AddValue(name string, value metric.Counter) error {
+func (_m *CounterService) Increase(name string, value metric.Counter) error {
 	ret := _m.Called(name, value)
 
 	var r0 error

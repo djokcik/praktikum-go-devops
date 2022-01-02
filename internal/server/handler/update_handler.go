@@ -41,7 +41,7 @@ func (h *Handler) CounterHandler() http.HandlerFunc {
 			return
 		}
 
-		err = h.Counter.AddValue(metricName, metric.Counter(parseValue))
+		err = h.Counter.Increase(metricName, metric.Counter(parseValue))
 
 		if err != nil {
 			http.Error(rw, err.Error(), http.StatusBadRequest)

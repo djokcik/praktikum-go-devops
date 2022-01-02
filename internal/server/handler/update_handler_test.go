@@ -71,7 +71,7 @@ func TestHandler_GaugeHandler(t *testing.T) {
 func TestHandler_CounterHandler(t *testing.T) {
 	t.Run("1. Should update metric", func(t *testing.T) {
 		m := mocks.CounterService{Mock: mock.Mock{}}
-		m.On("AddValue", "PollCount", metric.Counter(25)).Return(nil)
+		m.On("Increase", "PollCount", metric.Counter(25)).Return(nil)
 
 		h := Handler{Counter: &m, Mux: chi.NewMux()}
 		request := httptest.NewRequest(http.MethodPost, "/update/counter/PollCount/25", nil)
@@ -84,12 +84,12 @@ func TestHandler_CounterHandler(t *testing.T) {
 		defer res.Body.Close()
 
 		require.Equal(t, res.StatusCode, http.StatusOK)
-		m.AssertNumberOfCalls(t, "AddValue", 1)
+		m.AssertNumberOfCalls(t, "Increase", 1)
 	})
 
 	t.Run("2. Should return error when value is float", func(t *testing.T) {
 		m := mocks.CounterService{Mock: mock.Mock{}}
-		m.On("AddValue", mock.Anything, mock.Anything).Return(nil)
+		m.On("Increase", mock.Anything, mock.Anything).Return(nil)
 
 		h := Handler{Counter: &m, Mux: chi.NewMux()}
 		request := httptest.NewRequest(http.MethodPost, "/update/counter/PollCount/0.123", nil)
@@ -102,12 +102,12 @@ func TestHandler_CounterHandler(t *testing.T) {
 		defer res.Body.Close()
 
 		require.Equal(t, res.StatusCode, http.StatusBadRequest)
-		m.AssertNumberOfCalls(t, "AddValue", 0)
+		m.AssertNumberOfCalls(t, "Increase", 0)
 	})
 
 	t.Run("3. Should return error when add value return error", func(t *testing.T) {
 		m := mocks.CounterService{Mock: mock.Mock{}}
-		m.On("AddValue", mock.Anything, mock.Anything).Return(errors.New("error"))
+		m.On("Increase", mock.Anything, mock.Anything).Return(errors.New("error"))
 
 		h := Handler{Counter: &m, Mux: chi.NewMux()}
 		request := httptest.NewRequest(http.MethodPost, "/update/counter/PollCount/25", nil)
@@ -120,6 +120,6 @@ func TestHandler_CounterHandler(t *testing.T) {
 		defer res.Body.Close()
 
 		require.Equal(t, res.StatusCode, http.StatusBadRequest)
-		m.AssertNumberOfCalls(t, "AddValue", 1)
+		m.AssertNumberOfCalls(t, "Increase", 1)
 	})
 }
