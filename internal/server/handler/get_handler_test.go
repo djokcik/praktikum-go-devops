@@ -16,7 +16,7 @@ import (
 func TestHandler_GetCounterMetricHandler(t *testing.T) {
 	t.Run("1. Should return 404 when metric didn`t find", func(t *testing.T) {
 		m := mocks.CounterService{Mock: mock.Mock{}}
-		m.On("GetOne", "TestName").Return(metric.Counter(0), storage.ErrValueNotFound)
+		m.On("GetOne", mock.Anything, "TestName").Return(metric.Counter(0), storage.ErrValueNotFound)
 
 		h := Handler{Counter: &m, Mux: chi.NewMux()}
 		request := httptest.NewRequest(http.MethodGet, "/value/counter/TestName", nil)
@@ -34,7 +34,7 @@ func TestHandler_GetCounterMetricHandler(t *testing.T) {
 
 	t.Run("2. Should return 404 when metric didn`t find", func(t *testing.T) {
 		m := mocks.CounterService{Mock: mock.Mock{}}
-		m.On("GetOne", "TestName").Return(metric.Counter(0), storage.ErrValueNotFound)
+		m.On("GetOne", mock.Anything, "TestName").Return(metric.Counter(0), storage.ErrValueNotFound)
 
 		h := Handler{Counter: &m, Mux: chi.NewMux()}
 		request := httptest.NewRequest(http.MethodGet, "/value/counter/TestName", nil)
@@ -54,7 +54,7 @@ func TestHandler_GetCounterMetricHandler(t *testing.T) {
 func TestHandler_GetGaugeMetricHandler(t *testing.T) {
 	t.Run("1. Should return gauge metric", func(t *testing.T) {
 		m := mocks.GaugeService{Mock: mock.Mock{}}
-		m.On("GetOne", "TestName").Return(metric.Gauge(0.123), nil)
+		m.On("GetOne", mock.Anything, "TestName").Return(metric.Gauge(0.123), nil)
 
 		h := Handler{Gauge: &m, Mux: chi.NewMux()}
 		request := httptest.NewRequest(http.MethodGet, "/value/gauge/TestName", nil)
@@ -75,7 +75,7 @@ func TestHandler_GetGaugeMetricHandler(t *testing.T) {
 
 	t.Run("2. Should return 404 when metric didn`t find", func(t *testing.T) {
 		m := mocks.GaugeService{Mock: mock.Mock{}}
-		m.On("GetOne", "TestName").Return(metric.Gauge(0), storage.ErrValueNotFound)
+		m.On("GetOne", mock.Anything, "TestName").Return(metric.Gauge(0), storage.ErrValueNotFound)
 
 		h := Handler{Gauge: &m, Mux: chi.NewMux()}
 		request := httptest.NewRequest(http.MethodGet, "/value/gauge/TestName", nil)

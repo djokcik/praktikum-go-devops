@@ -2,8 +2,8 @@ package handler
 
 import (
 	"github.com/djokcik/praktikum-go-devops/internal/metric"
+	"github.com/djokcik/praktikum-go-devops/pkg/logging"
 	"html/template"
-	"log"
 	"net/http"
 )
 
@@ -14,21 +14,27 @@ func (h *Handler) ListHandler() http.HandlerFunc {
 	}
 
 	return func(rw http.ResponseWriter, r *http.Request) {
-		counterMetrics, err := h.Counter.List()
+		ctx := r.Context()
+		logger := h.Log(ctx).With().Str(logging.ServiceKey, "ListHandler").Logger()
+		ctx = logging.SetCtxLogger(ctx, logger)
+
+		counterMetrics, err := h.Counter.List(ctx)
 		if err != nil {
+			h.Log(ctx).Error().Err(err).Msg("counterMetrics internal error")
 			http.Error(rw, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		gaugeMetrics, err := h.Gauge.List()
+		gaugeMetrics, err := h.Gauge.List(ctx)
 		if err != nil {
+			h.Log(ctx).Error().Err(err).Msg("gaugeMetrics internal error")
 			http.Error(rw, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		tmpl, err := template.ParseFiles("static/listMetrics.html")
 		if err != nil {
-			log.Println(err.Error())
+			h.Log(ctx).Error().Err(err).Msg("read template internal error")
 			http.Error(rw, "Internal Server Error", 500)
 			return
 		}
@@ -39,8 +45,10 @@ func (h *Handler) ListHandler() http.HandlerFunc {
 		})
 
 		if err != nil {
-			log.Println(err.Error())
+			h.Log(ctx).Error().Err(err).Msg("parse template internal error")
 			http.Error(rw, "Internal Server Error", 500)
 		}
+
+		h.Log(ctx).Info().Msg("list handled")
 	}
 }

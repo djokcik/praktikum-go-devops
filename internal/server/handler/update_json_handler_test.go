@@ -55,7 +55,7 @@ func TestHandler_UpdateJSONHandler(t *testing.T) {
 
 	t.Run("3. Should update counter value", func(t *testing.T) {
 		m := mocks.CounterService{Mock: mock.Mock{}}
-		m.On("Increase", "TestMetric", metric.Counter(10)).Return(nil)
+		m.On("Increase", mock.Anything, "TestMetric", metric.Counter(10)).Return(nil)
 
 		h := Handler{Counter: &m, Mux: chi.NewMux()}
 		h.Post("/update/", h.UpdateJSONHandler())
@@ -78,7 +78,7 @@ func TestHandler_UpdateJSONHandler(t *testing.T) {
 
 	t.Run("4. Should update gauge value", func(t *testing.T) {
 		m := mocks.GaugeService{Mock: mock.Mock{}}
-		m.On("Update", "TestMetric", metric.Gauge(0.123)).Return(true, nil)
+		m.On("Update", mock.Anything, "TestMetric", metric.Gauge(0.123)).Return(true, nil)
 
 		h := Handler{Gauge: &m, Mux: chi.NewMux()}
 		h.Post("/update/", h.UpdateJSONHandler())

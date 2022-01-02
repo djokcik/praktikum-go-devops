@@ -15,7 +15,7 @@ import (
 func TestHandler_GaugeHandler(t *testing.T) {
 	t.Run("1. Should update metric", func(t *testing.T) {
 		m := mocks.GaugeService{Mock: mock.Mock{}}
-		m.On("Update", "Alloc", metric.Gauge(0.123)).Return(true, nil)
+		m.On("Update", mock.Anything, "Alloc", metric.Gauge(0.123)).Return(true, nil)
 
 		h := Handler{Gauge: &m, Mux: chi.NewMux()}
 		request := httptest.NewRequest(http.MethodPost, "/update/gauge/Alloc/0.123", nil)
@@ -33,7 +33,7 @@ func TestHandler_GaugeHandler(t *testing.T) {
 
 	t.Run("2. Should return error when value is string", func(t *testing.T) {
 		m := mocks.GaugeService{Mock: mock.Mock{}}
-		m.On("Update", mock.Anything, mock.Anything).Return(true, nil)
+		m.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
 
 		h := Handler{Gauge: &m, Mux: chi.NewMux()}
 		request := httptest.NewRequest(http.MethodPost, "/update/gauge/Alloc/test", nil)
@@ -51,7 +51,7 @@ func TestHandler_GaugeHandler(t *testing.T) {
 
 	t.Run("3. Should return error when update was error", func(t *testing.T) {
 		m := mocks.GaugeService{Mock: mock.Mock{}}
-		m.On("Update", mock.Anything, mock.Anything).Return(false, errors.New("error"))
+		m.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(false, errors.New("error"))
 
 		h := Handler{Gauge: &m, Mux: chi.NewMux()}
 		request := httptest.NewRequest(http.MethodPost, "/update/gauge/Alloc/0.123", nil)
@@ -71,7 +71,7 @@ func TestHandler_GaugeHandler(t *testing.T) {
 func TestHandler_CounterHandler(t *testing.T) {
 	t.Run("1. Should update metric", func(t *testing.T) {
 		m := mocks.CounterService{Mock: mock.Mock{}}
-		m.On("Increase", "PollCount", metric.Counter(25)).Return(nil)
+		m.On("Increase", mock.Anything, "PollCount", metric.Counter(25)).Return(nil)
 
 		h := Handler{Counter: &m, Mux: chi.NewMux()}
 		request := httptest.NewRequest(http.MethodPost, "/update/counter/PollCount/25", nil)
@@ -89,7 +89,7 @@ func TestHandler_CounterHandler(t *testing.T) {
 
 	t.Run("2. Should return error when value is float", func(t *testing.T) {
 		m := mocks.CounterService{Mock: mock.Mock{}}
-		m.On("Increase", mock.Anything, mock.Anything).Return(nil)
+		m.On("Increase", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 		h := Handler{Counter: &m, Mux: chi.NewMux()}
 		request := httptest.NewRequest(http.MethodPost, "/update/counter/PollCount/0.123", nil)
@@ -107,7 +107,7 @@ func TestHandler_CounterHandler(t *testing.T) {
 
 	t.Run("3. Should return error when add value return error", func(t *testing.T) {
 		m := mocks.CounterService{Mock: mock.Mock{}}
-		m.On("Increase", mock.Anything, mock.Anything).Return(errors.New("error"))
+		m.On("Increase", mock.Anything, mock.Anything, mock.Anything).Return(errors.New("error"))
 
 		h := Handler{Counter: &m, Mux: chi.NewMux()}
 		request := httptest.NewRequest(http.MethodPost, "/update/counter/PollCount/25", nil)

@@ -28,10 +28,10 @@ func TestHandler_ListHandler(t *testing.T) {
 		metricList := []metric.Metric{{Name: "TestType", Value: "TestValue"}}
 
 		counterMock := mocks.CounterService{Mock: mock.Mock{}}
-		counterMock.On("List").Return([]metric.Metric{}, nil)
+		counterMock.On("List", mock.Anything).Return([]metric.Metric{}, nil)
 
 		gaugeMock := mocks.GaugeService{Mock: mock.Mock{}}
-		gaugeMock.On("List").Return(metricList, nil)
+		gaugeMock.On("List", mock.Anything).Return(metricList, nil)
 
 		h := Handler{Gauge: &gaugeMock, Counter: &counterMock, Mux: chi.NewMux()}
 		request := httptest.NewRequest(http.MethodGet, "/", nil)

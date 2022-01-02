@@ -1,7 +1,10 @@
 package agent
 
 import (
+	"context"
 	"github.com/djokcik/praktikum-go-devops/internal/agent/metric"
+	"github.com/djokcik/praktikum-go-devops/pkg/logging"
+	"github.com/rs/zerolog"
 	"net/http"
 )
 
@@ -71,4 +74,11 @@ func GetAgentMetrics() []AgentMetric {
 		// Counter
 		new(metric.PollCount),
 	}
+}
+
+func (a *agent) Log(ctx context.Context) *zerolog.Logger {
+	_, logger := logging.GetCtxLogger(ctx)
+	logger = logger.With().Str(logging.ServiceKey, "Agent").Logger()
+
+	return &logger
 }

@@ -8,6 +8,8 @@ import (
 	"github.com/djokcik/praktikum-go-devops/internal/server"
 	"github.com/djokcik/praktikum-go-devops/internal/server/storage/model"
 	"github.com/djokcik/praktikum-go-devops/internal/server/storage/store"
+	"github.com/djokcik/praktikum-go-devops/pkg/logging"
+	"github.com/rs/zerolog"
 	"sync"
 )
 
@@ -27,11 +29,10 @@ func (r *MetricRepository) Configure(ctx context.Context, wg *sync.WaitGroup, db
 	r.Store.Configure(ctx, wg)
 }
 
-func (r *MetricRepository) Update(name interface{}, value interface{}) (bool, error) {
+func (r *MetricRepository) Update(ctx context.Context, name interface{}, value interface{}) (bool, error) {
 	r.db.Lock()
 	defer r.db.Unlock()
 
-	// TODO use db that code will be more simply
 	switch metricValue := value.(type) {
 	default:
 		return false, fmt.Errorf("entity could`t convert `%v` into available metric type", value)
@@ -41,15 +42,15 @@ func (r *MetricRepository) Update(name interface{}, value interface{}) (bool, er
 		r.db.GaugeMapMetric[name.(string)] = metricValue
 	}
 
-	r.Store.NotifyUpdateDBValue()
+	r.Store.NotifyUpdateDBValue(ctx)
+	r.Log(ctx).Info().Msg("metric updated")
 
 	return true, nil
 }
 
-func (r *MetricRepository) List(filter *ListRepositoryFilter) (interface{}, error) {
+func (r *MetricRepository) List(ctx context.Context, filter *ListRepositoryFilter) (interface{}, error) {
 	var metricList []metric.Metric
 
-	// TODO use db that code will be more simply
 	switch filter.Type {
 	default:
 		return nil, fmt.Errorf("type `%v` isn`t avalilable metric type", filter.Type)
@@ -63,10 +64,12 @@ func (r *MetricRepository) List(filter *ListRepositoryFilter) (interface{}, erro
 		}
 	}
 
+	r.Log(ctx).Info().Msg("list finished")
+
 	return metricList, nil
 }
 
-func (r *MetricRepository) Get(filter *GetRepositoryFilter) (interface{}, error) {
+func (r *MetricRepository) Get(ctx context.Context, filter *GetRepositoryFilter) (interface{}, error) {
 	metricType := filter.Type
 	var value interface{}
 	var ok bool
@@ -87,5 +90,14 @@ func (r *MetricRepository) Get(filter *GetRepositoryFilter) (interface{}, error)
 		}
 	}
 
+	r.Log(ctx).Info().Msg("get metric finished")
+
 	return value, nil
+}
+
+func (r *MetricRepository) Log(ctx context.Context) *zerolog.Logger {
+	_, logger := logging.GetCtxLogger(ctx)
+	logger = logger.With().Str(logging.ServiceKey, "metric repository").Logger()
+
+	return &logger
 }

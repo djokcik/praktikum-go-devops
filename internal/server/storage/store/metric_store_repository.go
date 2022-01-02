@@ -3,12 +3,12 @@ package store
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/djokcik/praktikum-go-devops/internal/helpers"
 	"github.com/djokcik/praktikum-go-devops/internal/metric"
 	"github.com/djokcik/praktikum-go-devops/internal/server"
 	"github.com/djokcik/praktikum-go-devops/internal/server/storage/model"
-	"log"
+	"github.com/djokcik/praktikum-go-devops/pkg/logging"
+	"github.com/rs/zerolog"
 	"os"
 	"sync"
 )
@@ -17,7 +17,7 @@ import (
 
 type MetricStore interface {
 	Configure(ctx context.Context, wg *sync.WaitGroup)
-	NotifyUpdateDBValue()
+	NotifyUpdateDBValue(ctx context.Context)
 }
 
 type storeEvent struct {
@@ -49,7 +49,6 @@ func (r *metricFileStoreReader) ReadEvent() (*storeEvent, error) {
 	return &event, err
 }
 
-// Close TODO: нужно прокинуть контекст и закрыть файл
 func (r *metricFileStoreReader) Close() error {
 	return r.file.Close()
 }
@@ -76,7 +75,6 @@ func (w *metricFileStoreWriter) SaveEvent(event *storeEvent) error {
 	return w.encoder.Encode(&event)
 }
 
-// Close TODO: нужно прокинуть контекст и закрыть файл
 func (w *metricFileStoreWriter) Close() error {
 	return w.file.Close()
 }
@@ -92,29 +90,8 @@ type MetricStoreFile struct {
 func (s *MetricStoreFile) Configure(ctx context.Context, wg *sync.WaitGroup) {
 	filename := s.Cfg.StoreFile
 	if filename == "" {
-		log.Printf("Save metrics to file are disabled")
+		s.Log(ctx).Info().Msg("save metrics to file are disabled")
 		return
-	}
-
-	reader, err := newMetricFileStoreReader(filename)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	writer, err := newMetricFileStoreWriter(filename)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	s.FileReader = reader
-	s.FileWriter = writer
-
-	if s.Cfg.Restore {
-		s.RestoreDBValue()
-	}
-
-	if s.Cfg.StoreInterval != 0 {
-		go helpers.SetTicker(s.SaveDBValue, s.Cfg.StoreInterval)
 	}
 
 	wg.Add(1)
@@ -122,45 +99,75 @@ func (s *MetricStoreFile) Configure(ctx context.Context, wg *sync.WaitGroup) {
 		<-ctx.Done()
 		defer wg.Done()
 
-		s.SaveDBValue()
+		s.SaveDBValue(ctx)
 
 		s.FileReader.Close()
 		s.FileWriter.Close()
 	}()
-}
 
-func (s *MetricStoreFile) NotifyUpdateDBValue() {
-	if s.Cfg.StoreInterval == 0 {
-		s.SaveDBValue()
+	reader, err := newMetricFileStoreReader(filename)
+	if err != nil {
+		s.Log(ctx).Fatal().Err(err).Msg("failed to open reader")
+	}
+
+	writer, err := newMetricFileStoreWriter(filename)
+	if err != nil {
+		s.Log(ctx).Fatal().Err(err).Msg("failed to open writer")
+	}
+
+	s.FileReader = reader
+	s.FileWriter = writer
+
+	if s.Cfg.Restore {
+		s.RestoreDBValue(ctx)
+	}
+
+	if s.Cfg.StoreInterval != 0 {
+		go helpers.SetTicker(func() { s.SaveDBValue(ctx) }, s.Cfg.StoreInterval)
 	}
 }
 
-func (s *MetricStoreFile) SaveDBValue() {
+func (s *MetricStoreFile) NotifyUpdateDBValue(ctx context.Context) {
+	if s.Cfg.StoreInterval == 0 {
+		s.SaveDBValue(ctx)
+	}
+}
+
+func (s *MetricStoreFile) SaveDBValue(ctx context.Context) {
+	s.Log(ctx).Info().Msg("save metrics to file")
+
 	err := s.FileWriter.file.Truncate(0)
 	if err != nil {
-		log.Printf("invalid truncate metrics with error: %s", err)
+		s.Log(ctx).Error().Err(err).Msgf("invalid truncate metrics")
 		return
 	}
 
 	_, err = s.FileWriter.file.Seek(0, 0)
 	if err != nil {
-		log.Printf("invalid update seek with error: %s", err)
+		s.Log(ctx).Error().Err(err).Msgf("invalid update seek")
 		return
 	}
 
 	err = s.FileWriter.encoder.Encode(&storeEvent{GaugeMapMetric: s.DB.GaugeMapMetric, CounterMapMetric: s.DB.CounterMapMetric})
 	if err != nil {
-		log.Printf("invalid save metrics with error: %s", err)
+		s.Log(ctx).Error().Err(err).Msgf("invalid save metrics")
 		return
 	}
 }
 
-func (s *MetricStoreFile) RestoreDBValue() {
+func (s *MetricStoreFile) RestoreDBValue(ctx context.Context) {
 	event, err := s.FileReader.ReadEvent()
 	if err == nil {
 		s.DB.GaugeMapMetric = event.GaugeMapMetric
 		s.DB.CounterMapMetric = event.CounterMapMetric
 
-		log.Println(fmt.Sprintf("metrics restored from file %s", s.Cfg.StoreFile))
+		s.Log(ctx).Info().Msgf("metrics restored from file %s", s.Cfg.StoreFile)
 	}
+}
+
+func (s *MetricStoreFile) Log(ctx context.Context) *zerolog.Logger {
+	_, logger := logging.GetCtxLogger(ctx)
+	logger = logger.With().Str(logging.ServiceKey, "MetricStoreFile").Logger()
+
+	return &logger
 }

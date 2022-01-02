@@ -15,7 +15,7 @@ import (
 func TestMetricRepository_Update(t *testing.T) {
 	t.Run("1. Should update repository counter map", func(t *testing.T) {
 		mockStore := mocks.MetricStore{Mock: mock.Mock{}}
-		mockStore.On("NotifyUpdateDBValue").Return()
+		mockStore.On("NotifyUpdateDBValue", context.Background()).Return()
 
 		db := new(model.Database)
 
@@ -23,7 +23,7 @@ func TestMetricRepository_Update(t *testing.T) {
 		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, &server.Config{})
 		repository.Store = &mockStore
 
-		val, err := repository.Update("MetricName", metric.Counter(123))
+		val, err := repository.Update(context.Background(), "MetricName", metric.Counter(123))
 		if err != nil {
 			t.Errorf("error update repository: %v", err)
 		}
@@ -35,7 +35,7 @@ func TestMetricRepository_Update(t *testing.T) {
 
 	t.Run("2. Should update repository gauge map", func(t *testing.T) {
 		mockStore := mocks.MetricStore{}
-		mockStore.On("NotifyUpdateDBValue")
+		mockStore.On("NotifyUpdateDBValue", context.Background())
 
 		db := new(model.Database)
 
@@ -43,7 +43,7 @@ func TestMetricRepository_Update(t *testing.T) {
 		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, &server.Config{})
 		repository.Store = &mockStore
 
-		val, err := repository.Update("MetricName", metric.Gauge(0.123))
+		val, err := repository.Update(context.Background(), "MetricName", metric.Gauge(0.123))
 		if err != nil {
 			t.Errorf("error update repository: %v", err)
 		}
@@ -58,7 +58,7 @@ func TestMetricRepository_Update(t *testing.T) {
 		repository := new(MetricRepository)
 		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, &server.Config{})
 
-		val, err := repository.Update("MetricName", 123)
+		val, err := repository.Update(context.Background(), "MetricName", 123)
 
 		require.Equal(t, val, false)
 		require.Equal(t, err == nil, false)
@@ -75,7 +75,7 @@ func TestMetricRepository_List(t *testing.T) {
 		db.GaugeMapMetric["TestGaugeName"] = metric.Gauge(0.123)
 		db.CounterMapMetric["TestCounterName"] = metric.Counter(123)
 
-		list, err := repository.List(&ListRepositoryFilter{Type: metric.CounterType})
+		list, err := repository.List(context.Background(), &ListRepositoryFilter{Type: metric.CounterType})
 		if err != nil {
 			t.Errorf("error update repository: %v", err)
 		}
@@ -92,7 +92,7 @@ func TestMetricRepository_List(t *testing.T) {
 		db.GaugeMapMetric["TestGaugeName"] = metric.Gauge(0.123)
 		db.CounterMapMetric["TestCounterName"] = metric.Counter(123)
 
-		list, err := repository.List(&ListRepositoryFilter{Type: metric.GaugeType})
+		list, err := repository.List(context.Background(), &ListRepositoryFilter{Type: metric.GaugeType})
 		if err != nil {
 			t.Errorf("error update repository: %v", err)
 		}
@@ -111,7 +111,7 @@ func TestMetricRepository_Get(t *testing.T) {
 		db.GaugeMapMetric["TestGaugeName"] = metric.Gauge(0.123)
 		db.CounterMapMetric["TestCounterName"] = metric.Counter(123)
 
-		val, err := repository.Get(&GetRepositoryFilter{Type: metric.CounterType, Name: "TestCounterName"})
+		val, err := repository.Get(context.Background(), &GetRepositoryFilter{Type: metric.CounterType, Name: "TestCounterName"})
 		if err != nil {
 			t.Errorf("error update repository: %v", err)
 		}
@@ -125,7 +125,7 @@ func TestMetricRepository_Get(t *testing.T) {
 		repository := new(MetricRepository)
 		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, &server.Config{})
 
-		val, err := repository.Get(&GetRepositoryFilter{
+		val, err := repository.Get(context.Background(), &GetRepositoryFilter{
 			Type: metric.CounterType,
 			Name: "TestCounterName",
 		})
@@ -143,7 +143,7 @@ func TestMetricRepository_Get(t *testing.T) {
 		db.GaugeMapMetric["TestGaugeName"] = metric.Gauge(0.123)
 		db.CounterMapMetric["TestCounterName"] = metric.Counter(123)
 
-		val, err := repository.Get(&GetRepositoryFilter{Type: metric.GaugeType, Name: "TestGaugeName"})
+		val, err := repository.Get(context.Background(), &GetRepositoryFilter{Type: metric.GaugeType, Name: "TestGaugeName"})
 		if err != nil {
 			t.Errorf("error update repository: %v", err)
 		}
@@ -157,7 +157,7 @@ func TestMetricRepository_Get(t *testing.T) {
 		repository := new(MetricRepository)
 		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, &server.Config{})
 
-		val, err := repository.Get(&GetRepositoryFilter{
+		val, err := repository.Get(context.Background(), &GetRepositoryFilter{
 			Type: metric.GaugeType,
 			Name: "TestGaugeName",
 		})

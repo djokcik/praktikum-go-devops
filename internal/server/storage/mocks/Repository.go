@@ -25,13 +25,13 @@ func (_m *Repository) Configure(ctx context.Context, wg *sync.WaitGroup, db *mod
 	_m.Called(ctx, wg, db, cfg)
 }
 
-// Get provides a mock function with given fields: filter
-func (_m *Repository) Get(filter *storage.GetRepositoryFilter) (interface{}, error) {
-	ret := _m.Called(filter)
+// Get provides a mock function with given fields: ctx, filter
+func (_m *Repository) Get(ctx context.Context, filter *storage.GetRepositoryFilter) (interface{}, error) {
+	ret := _m.Called(ctx, filter)
 
 	var r0 interface{}
-	if rf, ok := ret.Get(0).(func(*storage.GetRepositoryFilter) interface{}); ok {
-		r0 = rf(filter)
+	if rf, ok := ret.Get(0).(func(context.Context, *storage.GetRepositoryFilter) interface{}); ok {
+		r0 = rf(ctx, filter)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(interface{})
@@ -39,8 +39,8 @@ func (_m *Repository) Get(filter *storage.GetRepositoryFilter) (interface{}, err
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(*storage.GetRepositoryFilter) error); ok {
-		r1 = rf(filter)
+	if rf, ok := ret.Get(1).(func(context.Context, *storage.GetRepositoryFilter) error); ok {
+		r1 = rf(ctx, filter)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -48,13 +48,13 @@ func (_m *Repository) Get(filter *storage.GetRepositoryFilter) (interface{}, err
 	return r0, r1
 }
 
-// List provides a mock function with given fields: filter
-func (_m *Repository) List(filter *storage.ListRepositoryFilter) (interface{}, error) {
-	ret := _m.Called(filter)
+// List provides a mock function with given fields: ctx, filter
+func (_m *Repository) List(ctx context.Context, filter *storage.ListRepositoryFilter) (interface{}, error) {
+	ret := _m.Called(ctx, filter)
 
 	var r0 interface{}
-	if rf, ok := ret.Get(0).(func(*storage.ListRepositoryFilter) interface{}); ok {
-		r0 = rf(filter)
+	if rf, ok := ret.Get(0).(func(context.Context, *storage.ListRepositoryFilter) interface{}); ok {
+		r0 = rf(ctx, filter)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(interface{})
@@ -62,8 +62,8 @@ func (_m *Repository) List(filter *storage.ListRepositoryFilter) (interface{}, e
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(*storage.ListRepositoryFilter) error); ok {
-		r1 = rf(filter)
+	if rf, ok := ret.Get(1).(func(context.Context, *storage.ListRepositoryFilter) error); ok {
+		r1 = rf(ctx, filter)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -71,20 +71,20 @@ func (_m *Repository) List(filter *storage.ListRepositoryFilter) (interface{}, e
 	return r0, r1
 }
 
-// Update provides a mock function with given fields: id, entity
-func (_m *Repository) Update(id interface{}, entity interface{}) (bool, error) {
-	ret := _m.Called(id, entity)
+// Update provides a mock function with given fields: ctx, id, entity
+func (_m *Repository) Update(ctx context.Context, id interface{}, entity interface{}) (bool, error) {
+	ret := _m.Called(ctx, id, entity)
 
 	var r0 bool
-	if rf, ok := ret.Get(0).(func(interface{}, interface{}) bool); ok {
-		r0 = rf(id, entity)
+	if rf, ok := ret.Get(0).(func(context.Context, interface{}, interface{}) bool); ok {
+		r0 = rf(ctx, id, entity)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(interface{}, interface{}) error); ok {
-		r1 = rf(id, entity)
+	if rf, ok := ret.Get(1).(func(context.Context, interface{}, interface{}) error); ok {
+		r1 = rf(ctx, id, entity)
 	} else {
 		r1 = ret.Error(1)
 	}

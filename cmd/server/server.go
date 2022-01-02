@@ -6,8 +6,8 @@ import (
 	"github.com/djokcik/praktikum-go-devops/internal/server/handler"
 	"github.com/djokcik/praktikum-go-devops/internal/server/storage"
 	"github.com/djokcik/praktikum-go-devops/internal/server/storage/model"
+	"github.com/djokcik/praktikum-go-devops/pkg/logging"
 	"github.com/go-chi/chi/v5"
-	"log"
 	"net/http"
 	"sync"
 )
@@ -16,7 +16,7 @@ func makeMetricRoutes(ctx context.Context, wg *sync.WaitGroup, mux *chi.Mux, cfg
 	rr := storage.NewRepositoryRegistry(ctx, wg, cfg, new(model.Database), &storage.MetricRepository{})
 	metricRepository, err := rr.Repository("MetricRepository")
 	if err != nil {
-		log.Println("Error provide repository 'MetricRepository'")
+		logging.NewLogger().Fatal().Err(err).Msg("Error provide repository 'MetricRepository'")
 	}
 
 	h := handler.NewHandler(mux, metricRepository)

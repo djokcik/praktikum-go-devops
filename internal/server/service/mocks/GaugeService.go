@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	metric "github.com/djokcik/praktikum-go-devops/internal/metric"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -12,20 +14,20 @@ type GaugeService struct {
 	mock.Mock
 }
 
-// GetOne provides a mock function with given fields: name
-func (_m *GaugeService) GetOne(name string) (metric.Gauge, error) {
-	ret := _m.Called(name)
+// GetOne provides a mock function with given fields: ctx, name
+func (_m *GaugeService) GetOne(ctx context.Context, name string) (metric.Gauge, error) {
+	ret := _m.Called(ctx, name)
 
 	var r0 metric.Gauge
-	if rf, ok := ret.Get(0).(func(string) metric.Gauge); ok {
-		r0 = rf(name)
+	if rf, ok := ret.Get(0).(func(context.Context, string) metric.Gauge); ok {
+		r0 = rf(ctx, name)
 	} else {
 		r0 = ret.Get(0).(metric.Gauge)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(name)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, name)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -33,13 +35,13 @@ func (_m *GaugeService) GetOne(name string) (metric.Gauge, error) {
 	return r0, r1
 }
 
-// List provides a mock function with given fields:
-func (_m *GaugeService) List() ([]metric.Metric, error) {
-	ret := _m.Called()
+// List provides a mock function with given fields: ctx
+func (_m *GaugeService) List(ctx context.Context) ([]metric.Metric, error) {
+	ret := _m.Called(ctx)
 
 	var r0 []metric.Metric
-	if rf, ok := ret.Get(0).(func() []metric.Metric); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(context.Context) []metric.Metric); ok {
+		r0 = rf(ctx)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]metric.Metric)
@@ -47,8 +49,8 @@ func (_m *GaugeService) List() ([]metric.Metric, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -56,20 +58,20 @@ func (_m *GaugeService) List() ([]metric.Metric, error) {
 	return r0, r1
 }
 
-// Update provides a mock function with given fields: name, value
-func (_m *GaugeService) Update(name string, value metric.Gauge) (bool, error) {
-	ret := _m.Called(name, value)
+// Update provides a mock function with given fields: ctx, name, value
+func (_m *GaugeService) Update(ctx context.Context, name string, value metric.Gauge) (bool, error) {
+	ret := _m.Called(ctx, name, value)
 
 	var r0 bool
-	if rf, ok := ret.Get(0).(func(string, metric.Gauge) bool); ok {
-		r0 = rf(name, value)
+	if rf, ok := ret.Get(0).(func(context.Context, string, metric.Gauge) bool); ok {
+		r0 = rf(ctx, name, value)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, metric.Gauge) error); ok {
-		r1 = rf(name, value)
+	if rf, ok := ret.Get(1).(func(context.Context, string, metric.Gauge) error); ok {
+		r1 = rf(ctx, name, value)
 	} else {
 		r1 = ret.Error(1)
 	}

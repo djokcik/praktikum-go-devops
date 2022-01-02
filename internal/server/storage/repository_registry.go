@@ -23,9 +23,9 @@ type ListRepositoryFilter struct {
 
 type Repository interface {
 	Configure(ctx context.Context, wg *sync.WaitGroup, db *model.Database, cfg *server.Config)
-	Update(id interface{}, entity interface{}) (bool, error)
-	List(filter *ListRepositoryFilter) (interface{}, error)
-	Get(filter *GetRepositoryFilter) (interface{}, error)
+	Update(ctx context.Context, id interface{}, entity interface{}) (bool, error)
+	List(ctx context.Context, filter *ListRepositoryFilter) (interface{}, error)
+	Get(ctx context.Context, filter *GetRepositoryFilter) (interface{}, error)
 }
 
 type BaseRepository struct {

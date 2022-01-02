@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	metric "github.com/djokcik/praktikum-go-devops/internal/metric"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -12,13 +14,34 @@ type CounterService struct {
 	mock.Mock
 }
 
-// AddValue provides a mock function with given fields: name, value
-func (_m *CounterService) Increase(name string, value metric.Counter) error {
-	ret := _m.Called(name, value)
+// GetOne provides a mock function with given fields: ctx, name
+func (_m *CounterService) GetOne(ctx context.Context, name string) (metric.Counter, error) {
+	ret := _m.Called(ctx, name)
+
+	var r0 metric.Counter
+	if rf, ok := ret.Get(0).(func(context.Context, string) metric.Counter); ok {
+		r0 = rf(ctx, name)
+	} else {
+		r0 = ret.Get(0).(metric.Counter)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// Increase provides a mock function with given fields: ctx, name, value
+func (_m *CounterService) Increase(ctx context.Context, name string, value metric.Counter) error {
+	ret := _m.Called(ctx, name, value)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, metric.Counter) error); ok {
-		r0 = rf(name, value)
+	if rf, ok := ret.Get(0).(func(context.Context, string, metric.Counter) error); ok {
+		r0 = rf(ctx, name, value)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -26,34 +49,13 @@ func (_m *CounterService) Increase(name string, value metric.Counter) error {
 	return r0
 }
 
-// GetOne provides a mock function with given fields: name
-func (_m *CounterService) GetOne(name string) (metric.Counter, error) {
-	ret := _m.Called(name)
-
-	var r0 metric.Counter
-	if rf, ok := ret.Get(0).(func(string) metric.Counter); ok {
-		r0 = rf(name)
-	} else {
-		r0 = ret.Get(0).(metric.Counter)
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(name)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// List provides a mock function with given fields:
-func (_m *CounterService) List() ([]metric.Metric, error) {
-	ret := _m.Called()
+// List provides a mock function with given fields: ctx
+func (_m *CounterService) List(ctx context.Context) ([]metric.Metric, error) {
+	ret := _m.Called(ctx)
 
 	var r0 []metric.Metric
-	if rf, ok := ret.Get(0).(func() []metric.Metric); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(context.Context) []metric.Metric); ok {
+		r0 = rf(ctx)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]metric.Metric)
@@ -61,8 +63,8 @@ func (_m *CounterService) List() ([]metric.Metric, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -70,20 +72,20 @@ func (_m *CounterService) List() ([]metric.Metric, error) {
 	return r0, r1
 }
 
-// Update provides a mock function with given fields: name, value
-func (_m *CounterService) Update(name string, value metric.Counter) (bool, error) {
-	ret := _m.Called(name, value)
+// Update provides a mock function with given fields: ctx, name, value
+func (_m *CounterService) Update(ctx context.Context, name string, value metric.Counter) (bool, error) {
+	ret := _m.Called(ctx, name, value)
 
 	var r0 bool
-	if rf, ok := ret.Get(0).(func(string, metric.Counter) bool); ok {
-		r0 = rf(name, value)
+	if rf, ok := ret.Get(0).(func(context.Context, string, metric.Counter) bool); ok {
+		r0 = rf(ctx, name, value)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, metric.Counter) error); ok {
-		r1 = rf(name, value)
+	if rf, ok := ret.Get(1).(func(context.Context, string, metric.Counter) error); ok {
+		r1 = rf(ctx, name, value)
 	} else {
 		r1 = ret.Error(1)
 	}

@@ -6,7 +6,7 @@ import (
 	"github.com/caarlos0/env/v6"
 	"github.com/djokcik/praktikum-go-devops/internal/agent"
 	"github.com/djokcik/praktikum-go-devops/internal/helpers"
-	"log"
+	"github.com/djokcik/praktikum-go-devops/pkg/logging"
 	"os"
 	"os/signal"
 	"syscall"
@@ -22,6 +22,11 @@ func main() {
 	parseEnv(&cfg)
 	parseFlags(&cfg)
 
+	logging.
+		NewLogger().
+		Info().
+		Msgf("Start Agent. Address: %s, PollInterval: %s, ReportInterval: %s", cfg.Address, cfg.PollInterval, cfg.ReportInterval)
+
 	metricAgent := agent.NewAgent(&cfg)
 
 	go helpers.SetTicker(metricAgent.CollectMetrics(ctx), cfg.PollInterval)
@@ -31,13 +36,13 @@ func main() {
 
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	<-quit
-	log.Println("Shutdown Agent ...")
+	logging.NewLogger().Info().Msg("Shutdown Agent ...")
 }
 
 func parseEnv(cfg *agent.Config) {
 	err := env.Parse(cfg)
 	if err != nil {
-		log.Fatal(err)
+		logging.NewLogger().Fatal().Err(err).Msg("error parse environment")
 	}
 }
 

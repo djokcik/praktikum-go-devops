@@ -20,7 +20,7 @@ func (_m *MetricStore) Configure(ctx context.Context, wg *sync.WaitGroup) {
 	_m.Called(ctx, wg)
 }
 
-// NotifyUpdateDBValue provides a mock function with given fields:
-func (_m *MetricStore) NotifyUpdateDBValue() {
-	_m.Called()
+// NotifyUpdateDBValue provides a mock function with given fields: ctx
+func (_m *MetricStore) NotifyUpdateDBValue(ctx context.Context) {
+	_m.Called(ctx)
 }
