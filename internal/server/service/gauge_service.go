@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"github.com/djokcik/praktikum-go-devops/internal/metric"
 	"github.com/djokcik/praktikum-go-devops/internal/server/storage"
 	"github.com/djokcik/praktikum-go-devops/pkg/logging"
@@ -38,6 +39,11 @@ func (s *GaugeServiceImpl) GetOne(ctx context.Context, name string) (metric.Gaug
 
 	if err != nil {
 		return metric.Gauge(0), err
+	}
+
+	if _, ok := val.(metric.Gauge); !ok {
+		s.Log(ctx).Error().Msgf("value %v isn`t type Gauge", val)
+		return metric.Gauge(0), errors.New("error parse gauge value")
 	}
 
 	return val.(metric.Gauge), nil

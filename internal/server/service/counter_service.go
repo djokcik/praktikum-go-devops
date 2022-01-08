@@ -32,6 +32,11 @@ func (s *CounterServiceImpl) GetOne(ctx context.Context, name string) (metric.Co
 		return metric.Counter(0), err
 	}
 
+	if _, ok := val.(metric.Counter); !ok {
+		s.Log(ctx).Error().Msgf("value %v isn`t type Counter", val)
+		return metric.Counter(0), errors.New("error parse counter value")
+	}
+
 	return val.(metric.Counter), nil
 }
 
