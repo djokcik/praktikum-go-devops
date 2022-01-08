@@ -18,13 +18,13 @@ type agent struct {
 }
 
 func NewAgent(cfg *Config) *agent {
-	agent := new(agent)
-	agent.CollectedMetric = make(map[string]SendAgentMetric)
-	agent.Client = &http.Client{}
-	agent.metrics = GetAgentMetrics()
-	agent.cfg = cfg
+	metricAgent := new(agent)
+	metricAgent.CollectedMetric = make(map[string]SendAgentMetric)
+	metricAgent.Client = &http.Client{}
+	metricAgent.metrics = GetAgentMetrics()
+	metricAgent.cfg = cfg
 
-	return agent
+	return metricAgent
 }
 
 type SendAgentMetric struct {
