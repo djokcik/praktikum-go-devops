@@ -3,6 +3,8 @@ package agent
 import (
 	"context"
 	"github.com/djokcik/praktikum-go-devops/internal/agent/metric"
+	"github.com/djokcik/praktikum-go-devops/pkg/logging"
+	"github.com/rs/zerolog"
 	"net/http"
 )
 
@@ -12,15 +14,17 @@ type agent struct {
 	CollectedMetric map[string]SendAgentMetric
 	Client          *http.Client
 	metrics         []AgentMetric
+	cfg             *Config
 }
 
-func NewAgent(ctx context.Context) *agent {
-	agent := new(agent)
-	agent.CollectedMetric = make(map[string]SendAgentMetric)
-	agent.Client = &http.Client{}
-	agent.metrics = GetAgentMetrics()
+func NewAgent(cfg *Config) *agent {
+	metricAgent := new(agent)
+	metricAgent.CollectedMetric = make(map[string]SendAgentMetric)
+	metricAgent.Client = &http.Client{}
+	metricAgent.metrics = GetAgentMetrics()
+	metricAgent.cfg = cfg
 
-	return agent
+	return metricAgent
 }
 
 type SendAgentMetric struct {
@@ -56,6 +60,8 @@ func GetAgentMetrics() []AgentMetric {
 		new(metric.MSpanInuse),
 		new(metric.MSpanSys),
 		new(metric.NextGC),
+		new(metric.TotalAlloc),
+		new(metric.Mallocs),
 		new(metric.NumForcedGC),
 		new(metric.NumGC),
 		new(metric.OtherSys),
@@ -68,4 +74,11 @@ func GetAgentMetrics() []AgentMetric {
 		// Counter
 		new(metric.PollCount),
 	}
+}
+
+func (a *agent) Log(ctx context.Context) *zerolog.Logger {
+	_, logger := logging.GetCtxLogger(ctx)
+	logger = logger.With().Str(logging.ServiceKey, "Agent").Logger()
+
+	return &logger
 }

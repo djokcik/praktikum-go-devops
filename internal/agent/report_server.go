@@ -1,20 +1,26 @@
 package agent
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
-	"log"
+	"github.com/djokcik/praktikum-go-devops/internal/metric"
+	"github.com/djokcik/praktikum-go-devops/pkg/logging"
+	"github.com/google/uuid"
 	"net/http"
 )
 
-const host = "127.0.0.1"
-const port = "8080"
-
 func (a *agent) SendToServer(ctx context.Context) func() {
 	return func() {
+		traceID, _ := uuid.NewUUID()
+		logger := a.Log(ctx).With().Str(logging.ServiceKey, "SendToServer").Str(logging.TraceIDKey, traceID.String()).Logger()
+		ctx = logging.SetCtxLogger(ctx, logger)
+
+		a.Log(ctx).Info().Msg("Start send metrics")
 		for _, sendMetric := range a.CollectedMetric {
 			if ctx.Err() != nil {
-				log.Printf("context cancelled")
+				a.Log(ctx).Error().Err(ctx.Err())
 				break
 			}
 
@@ -22,26 +28,42 @@ func (a *agent) SendToServer(ctx context.Context) func() {
 			metricType := sendMetric.Type
 			metricValue := sendMetric.Value
 
-			url := fmt.Sprintf("http://%s:%s/update/%s/%s/%v", host, port, metricType, metricName, metricValue)
+			url := fmt.Sprintf("http://%s/update/", a.cfg.Address)
 
-			req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, nil)
+			var metricDto metric.MetricsDto
+			switch metricType {
+			default:
+				a.Log(ctx).Error().Msgf("Invalid metric type: %s", metricType)
+				continue
+			case metric.GaugeType:
+				value := float64(metricValue.(metric.Gauge))
+				metricDto = metric.MetricsDto{ID: metricName, MType: metricType, Value: &value}
+			case metric.CounterType:
+				delta := int64(metricValue.(metric.Counter))
+				metricDto = metric.MetricsDto{ID: metricName, MType: metricType, Delta: &delta}
+			}
+
+			body, _ := json.Marshal(metricDto)
+			req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
 			if err != nil {
-				log.Printf("request was interrapted with error: %s", err)
+				a.Log(ctx).Error().Err(err).Msg("request was interrupted")
 				continue
 			}
 
-			req.Header.Set("application-type", "text/plain")
+			req.Header.Set("Content-Type", "application/json")
 
 			res, err := a.Client.Do(req)
 			if err != nil {
-				log.Printf("request %s ended with error %v", url, err)
+				a.Log(ctx).Error().Err(err).Msg("request ended with error")
 				continue
 			}
 
 			err = res.Body.Close()
 			if err != nil {
-				log.Printf("read from body closed with error: %v", err)
+				a.Log(ctx).Error().Err(err).Msg("read from body closed with error")
+				continue
 			}
 		}
+		a.Log(ctx).Info().Msg("Finished send metrics")
 	}
 }

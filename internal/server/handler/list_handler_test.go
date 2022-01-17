@@ -2,8 +2,7 @@ package handler
 
 import (
 	"github.com/djokcik/praktikum-go-devops/internal/metric"
-	"github.com/djokcik/praktikum-go-devops/internal/server/storage"
-	"github.com/djokcik/praktikum-go-devops/internal/server/storage/mocks"
+	"github.com/djokcik/praktikum-go-devops/internal/server/service/mocks"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -28,11 +27,13 @@ func TestHandler_ListHandler(t *testing.T) {
 
 		metricList := []metric.Metric{{Name: "TestType", Value: "TestValue"}}
 
-		m := mocks.Repository{Mock: mock.Mock{}}
-		m.On("List", storage.ListRepositoryFilter{Type: metric.GaugeType}).Return(metricList, nil)
-		m.On("List", storage.ListRepositoryFilter{Type: metric.CounterType}).Return([]metric.Metric{}, nil)
+		counterMock := mocks.CounterService{Mock: mock.Mock{}}
+		counterMock.On("List", mock.Anything).Return([]metric.Metric{}, nil)
 
-		h := Handler{Repo: &m, Mux: chi.NewMux()}
+		gaugeMock := mocks.GaugeService{Mock: mock.Mock{}}
+		gaugeMock.On("List", mock.Anything).Return(metricList, nil)
+
+		h := Handler{Gauge: &gaugeMock, Counter: &counterMock, Mux: chi.NewMux()}
 		request := httptest.NewRequest(http.MethodGet, "/", nil)
 		h.Get("/", h.ListHandler())
 
@@ -44,7 +45,9 @@ func TestHandler_ListHandler(t *testing.T) {
 
 		resBody, _ := io.ReadAll(res.Body)
 
-		m.AssertNumberOfCalls(t, "List", 2)
+		counterMock.AssertNumberOfCalls(t, "List", 1)
+		gaugeMock.AssertNumberOfCalls(t, "List", 1)
+
 		require.Equal(t, res.StatusCode, http.StatusOK)
 		require.NotContains(t, string(resBody), "Counter:")
 		require.Contains(t, string(resBody), "Gauges:")

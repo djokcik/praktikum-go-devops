@@ -1,33 +1,57 @@
 package handler
 
 import (
-	"fmt"
-	"github.com/djokcik/praktikum-go-devops/internal/metric"
-	"github.com/djokcik/praktikum-go-devops/internal/server/storage"
+	"github.com/djokcik/praktikum-go-devops/pkg/logging"
 	"github.com/go-chi/chi/v5"
 	"net/http"
 	"strconv"
 )
 
-func (h *Handler) GetMetricHandler() http.HandlerFunc {
+func (h *Handler) GetCounterMetricHandler() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		metricType := chi.URLParam(r, "type")
+		ctx := r.Context()
+		logger := h.Log(ctx).With().Str(logging.ServiceKey, "GetCounterMetricHandler").Logger()
+		ctx = logging.SetCtxLogger(ctx, logger)
+
 		metricName := chi.URLParam(r, "name")
 
-		metricValue, err := h.Repo.Get(storage.GetRepositoryFilter{Type: metricType, Name: metricName})
+		metricValue, err := h.Counter.GetOne(ctx, metricName)
+
+		logger.UpdateContext(metricValue.GetLoggerContext(metricName))
+		ctx = logging.SetCtxLogger(ctx, logger)
 
 		if err != nil {
+			h.Log(ctx).Warn().Err(err).Msg("metric not found")
 			http.Error(rw, err.Error(), http.StatusNotFound)
 			return
 		}
 
-		switch metricType {
-		default:
-			http.Error(rw, fmt.Sprintf("the metric `%v` didn`t find", metricType), http.StatusNotFound)
-		case metric.GaugeType:
-			rw.Write([]byte(strconv.FormatFloat(float64(metricValue.(metric.Gauge)), 'f', -1, 64)))
-		case metric.CounterType:
-			rw.Write([]byte(strconv.FormatInt(int64(metricValue.(metric.Counter)), 10)))
+		h.Log(ctx).Info().Msg("metric handled")
+
+		rw.Write([]byte(strconv.FormatInt(int64(metricValue), 10)))
+	}
+}
+
+func (h *Handler) GetGaugeMetricHandler() http.HandlerFunc {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		logger := h.Log(ctx).With().Str(logging.ServiceKey, "GetGaugeMetricHandler").Logger()
+		ctx = logging.SetCtxLogger(ctx, logger)
+
+		metricName := chi.URLParam(r, "name")
+		metricValue, err := h.Gauge.GetOne(ctx, metricName)
+
+		logger.UpdateContext(metricValue.GetLoggerContext(metricName))
+		ctx = logging.SetCtxLogger(ctx, logger)
+
+		if err != nil {
+			h.Log(ctx).Warn().Err(err).Msg("metric not found")
+			http.Error(rw, err.Error(), http.StatusNotFound)
+			return
 		}
+
+		h.Log(ctx).Info().Msg("metric handled")
+
+		rw.Write([]byte(strconv.FormatFloat(float64(metricValue), 'f', -1, 64)))
 	}
 }
