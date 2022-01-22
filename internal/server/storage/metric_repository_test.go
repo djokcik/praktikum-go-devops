@@ -20,7 +20,7 @@ func TestMetricRepository_Update(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, &server.Config{})
+		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, server.Config{})
 		repository.Store = &mockStore
 
 		val, err := repository.Update(context.Background(), "MetricName", metric.Counter(123))
@@ -40,7 +40,7 @@ func TestMetricRepository_Update(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, &server.Config{})
+		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, server.Config{})
 		repository.Store = &mockStore
 
 		val, err := repository.Update(context.Background(), "MetricName", metric.Gauge(0.123))
@@ -56,7 +56,7 @@ func TestMetricRepository_Update(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, &server.Config{})
+		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, server.Config{})
 
 		val, err := repository.Update(context.Background(), "MetricName", 123)
 
@@ -70,7 +70,7 @@ func TestMetricRepository_List(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, &server.Config{})
+		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, server.Config{})
 
 		db.GaugeMapMetric["TestGaugeName"] = metric.Gauge(0.123)
 		db.CounterMapMetric["TestCounterName"] = metric.Counter(123)
@@ -87,7 +87,7 @@ func TestMetricRepository_List(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, &server.Config{})
+		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, server.Config{})
 
 		db.GaugeMapMetric["TestGaugeName"] = metric.Gauge(0.123)
 		db.CounterMapMetric["TestCounterName"] = metric.Counter(123)
@@ -106,7 +106,7 @@ func TestMetricRepository_Get(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, &server.Config{})
+		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, server.Config{})
 
 		db.GaugeMapMetric["TestGaugeName"] = metric.Gauge(0.123)
 		db.CounterMapMetric["TestCounterName"] = metric.Counter(123)
@@ -123,7 +123,7 @@ func TestMetricRepository_Get(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, &server.Config{})
+		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, server.Config{})
 
 		val, err := repository.Get(context.Background(), &GetRepositoryFilter{
 			Type: metric.CounterType,
@@ -138,7 +138,7 @@ func TestMetricRepository_Get(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, &server.Config{})
+		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, server.Config{})
 
 		db.GaugeMapMetric["TestGaugeName"] = metric.Gauge(0.123)
 		db.CounterMapMetric["TestCounterName"] = metric.Counter(123)
@@ -155,7 +155,7 @@ func TestMetricRepository_Get(t *testing.T) {
 		db := new(model.Database)
 
 		repository := new(MetricRepository)
-		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, &server.Config{})
+		repository.BaseRepository.Configure(context.Background(), &sync.WaitGroup{}, db, server.Config{})
 
 		val, err := repository.Get(context.Background(), &GetRepositoryFilter{
 			Type: metric.GaugeType,

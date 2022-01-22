@@ -8,9 +8,8 @@ import (
 //go:generate mockery --name=Metric
 
 type Gauge float64
-type Counter int64
 
-func (o *Gauge) GetLoggerContext(metricName string) func(logCtx zerolog.Context) zerolog.Context {
+func (o Gauge) GetLoggerContext(metricName string) func(logCtx zerolog.Context) zerolog.Context {
 	return func(logCtx zerolog.Context) zerolog.Context {
 		return logCtx.
 			Str(logging.MetricType, "gauge").
@@ -18,7 +17,9 @@ func (o *Gauge) GetLoggerContext(metricName string) func(logCtx zerolog.Context)
 	}
 }
 
-func (o *Counter) GetLoggerContext(metricName string) func(logCtx zerolog.Context) zerolog.Context {
+type Counter int64
+
+func (c Counter) GetLoggerContext(metricName string) func(logCtx zerolog.Context) zerolog.Context {
 	return func(logCtx zerolog.Context) zerolog.Context {
 		return logCtx.
 			Str(logging.MetricType, "counter").
@@ -55,6 +56,7 @@ type MetricsDto struct {
 	MType string   `json:"type"`            // параметр, принимающий значение gauge или counter
 	Delta *int64   `json:"delta,omitempty"` // значение метрики в случае передачи counter
 	Value *float64 `json:"value,omitempty"` // значение метрики в случае передачи gauge
+	Hash  string   `json:"hash,omitempty"`  // значение хеш-функции
 }
 
 func (o *MetricsDto) GetLoggerContext(logCtx zerolog.Context) zerolog.Context {

@@ -22,7 +22,7 @@ type MetricRepository struct {
 	Store store.MetricStore
 }
 
-func (r *MetricRepository) Configure(ctx context.Context, wg *sync.WaitGroup, db *model.Database, cfg *server.Config) {
+func (r *MetricRepository) Configure(ctx context.Context, wg *sync.WaitGroup, db *model.Database, cfg server.Config) {
 	r.BaseRepository.Configure(ctx, wg, db, cfg)
 
 	r.Store = &store.MetricStoreFile{DB: db, Cfg: cfg}

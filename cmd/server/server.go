@@ -12,14 +12,14 @@ import (
 	"sync"
 )
 
-func makeMetricRoutes(ctx context.Context, wg *sync.WaitGroup, mux *chi.Mux, cfg *server.Config) *handler.Handler {
+func makeMetricRoutes(ctx context.Context, wg *sync.WaitGroup, mux *chi.Mux, cfg server.Config) *handler.Handler {
 	rr := storage.NewRepositoryRegistry(ctx, wg, cfg, new(model.Database), &storage.MetricRepository{})
 	metricRepository, err := rr.Repository("MetricRepository")
 	if err != nil {
 		logging.NewLogger().Fatal().Err(err).Msg("Error provide repository 'MetricRepository'")
 	}
 
-	h := handler.NewHandler(mux, metricRepository)
+	h := handler.NewHandler(mux, cfg, metricRepository)
 
 	h.Get("/", h.ListHandler())
 

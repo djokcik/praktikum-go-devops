@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/djokcik/praktikum-go-devops/internal/metric"
 	"github.com/djokcik/praktikum-go-devops/internal/server/service/mocks"
+	commonMocks "github.com/djokcik/praktikum-go-devops/internal/service/mocks"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -38,7 +39,10 @@ func TestHandler_GetJSONHandler(t *testing.T) {
 		m := mocks.CounterService{Mock: mock.Mock{}}
 		m.On("GetOne", mock.Anything, "TestMetric").Return(metric.Counter(10), nil)
 
-		h := Handler{Counter: &m, Mux: chi.NewMux()}
+		mHash := commonMocks.HashService{Mock: mock.Mock{}}
+		mHash.On("GetCounterHash", mock.Anything, "TestMetric", metric.Counter(10)).Return("hashTest")
+
+		h := Handler{Counter: &m, Hash: &mHash, Mux: chi.NewMux()}
 		h.Post("/update/", h.GetJSONHandler())
 
 		rBody, _ := json.Marshal(metric.MetricsDto{ID: "TestMetric", MType: "counter"})
@@ -52,7 +56,7 @@ func TestHandler_GetJSONHandler(t *testing.T) {
 		body, _ := io.ReadAll(res.Body)
 		defer res.Body.Close()
 
-		require.Equal(t, string(body), `{"id":"TestMetric","type":"counter","delta":10}`)
+		require.Equal(t, string(body), `{"id":"TestMetric","type":"counter","delta":10,"hash":"hashTest"}`)
 		require.Equal(t, res.StatusCode, http.StatusOK)
 	})
 
@@ -60,7 +64,10 @@ func TestHandler_GetJSONHandler(t *testing.T) {
 		m := mocks.GaugeService{Mock: mock.Mock{}}
 		m.On("GetOne", mock.Anything, "TestMetric").Return(metric.Gauge(0.123), nil)
 
-		h := Handler{Gauge: &m, Mux: chi.NewMux()}
+		mHash := commonMocks.HashService{Mock: mock.Mock{}}
+		mHash.On("GetGaugeHash", mock.Anything, "TestMetric", metric.Gauge(0.123)).Return("hashTest")
+
+		h := Handler{Gauge: &m, Hash: &mHash, Mux: chi.NewMux()}
 		h.Post("/update/", h.GetJSONHandler())
 
 		rDto := metric.MetricsDto{ID: "TestMetric", MType: "gauge"}
@@ -76,7 +83,7 @@ func TestHandler_GetJSONHandler(t *testing.T) {
 		body, _ := io.ReadAll(res.Body)
 		defer res.Body.Close()
 
-		require.Equal(t, string(body), `{"id":"TestMetric","type":"gauge","value":0.123}`)
+		require.Equal(t, string(body), `{"id":"TestMetric","type":"gauge","value":0.123,"hash":"hashTest"}`)
 		require.Equal(t, res.StatusCode, http.StatusOK)
 	})
 }

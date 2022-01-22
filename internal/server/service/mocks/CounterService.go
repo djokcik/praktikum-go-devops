@@ -92,3 +92,17 @@ func (_m *CounterService) Update(ctx context.Context, name string, value metric.
 
 	return r0, r1
 }
+
+// Verify provides a mock function with given fields: ctx, name, value, hash
+func (_m *CounterService) Verify(ctx context.Context, name string, value metric.Counter, hash string) bool {
+	ret := _m.Called(ctx, name, value, hash)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(context.Context, string, metric.Counter, string) bool); ok {
+		r0 = rf(ctx, name, value, hash)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	return r0
+}

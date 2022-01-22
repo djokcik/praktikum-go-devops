@@ -33,9 +33,25 @@ func (h *Handler) UpdateJSONHandler() http.HandlerFunc {
 			http.Error(rw, errMessage, http.StatusBadRequest)
 			return
 		case metric.CounterType:
-			err = h.Counter.Increase(ctx, metricDto.ID, metric.Counter(*metricDto.Delta))
+			name := metricDto.ID
+			value := metric.Counter(*metricDto.Delta)
+
+			if !h.Counter.Verify(ctx, name, value, metricDto.Hash) {
+				http.Error(rw, "Invalid sign", http.StatusBadRequest)
+				return
+			}
+
+			err = h.Counter.Increase(ctx, name, value)
 		case metric.GaugeType:
-			_, err = h.Gauge.Update(ctx, metricDto.ID, metric.Gauge(*metricDto.Value))
+			name := metricDto.ID
+			value := metric.Gauge(*metricDto.Value)
+
+			if !h.Gauge.Verify(ctx, name, value, metricDto.Hash) {
+				http.Error(rw, "Invalid sign", http.StatusBadRequest)
+				return
+			}
+
+			_, err = h.Gauge.Update(ctx, name, value)
 		}
 
 		if err != nil {

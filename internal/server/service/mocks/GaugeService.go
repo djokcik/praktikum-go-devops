@@ -78,3 +78,17 @@ func (_m *GaugeService) Update(ctx context.Context, name string, value metric.Ga
 
 	return r0, r1
 }
+
+// Verify provides a mock function with given fields: ctx, name, value, hash
+func (_m *GaugeService) Verify(ctx context.Context, name string, value metric.Gauge, hash string) bool {
+	ret := _m.Called(ctx, name, value, hash)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(context.Context, string, metric.Gauge, string) bool); ok {
+		r0 = rf(ctx, name, value, hash)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	return r0
+}

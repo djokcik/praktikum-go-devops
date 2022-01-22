@@ -11,9 +11,10 @@ type Config struct {
 	Address        string        `env:"ADDRESS"`
 	ReportInterval time.Duration `env:"REPORT_INTERVAL"`
 	PollInterval   time.Duration `env:"POLL_INTERVAL"`
+	Key            string        `env:"KEY"`
 }
 
-func NewConfig() *Config {
+func NewConfig() Config {
 	cfg := Config{
 		Address:        "127.0.0.1:8080",
 		ReportInterval: 10 * time.Second,
@@ -23,7 +24,7 @@ func NewConfig() *Config {
 	cfg.parseFlags()
 	cfg.parseEnv()
 
-	return &cfg
+	return cfg
 }
 
 func (cfg *Config) parseEnv() {
@@ -35,6 +36,7 @@ func (cfg *Config) parseEnv() {
 
 func (cfg *Config) parseFlags() {
 	flag.StringVar(&cfg.Address, "a", cfg.Address, "Server address")
+	flag.StringVar(&cfg.Key, "k", cfg.Key, "Hash key")
 	flag.DurationVar(&cfg.ReportInterval, "r", cfg.ReportInterval, "Report Interval")
 	flag.DurationVar(&cfg.PollInterval, "p", cfg.PollInterval, "Poll Interval")
 

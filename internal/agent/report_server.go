@@ -36,11 +36,15 @@ func (a *agent) SendToServer(ctx context.Context) func() {
 				a.Log(ctx).Error().Msgf("Invalid metric type: %s", metricType)
 				continue
 			case metric.GaugeType:
-				value := float64(metricValue.(metric.Gauge))
-				metricDto = metric.MetricsDto{ID: metricName, MType: metricType, Value: &value}
+				value := metricValue.(metric.Gauge)
+				refValue := float64(value)
+				hash := a.Hash.GetGaugeHash(ctx, metricName, value)
+				metricDto = metric.MetricsDto{ID: metricName, MType: metricType, Value: &refValue, Hash: hash}
 			case metric.CounterType:
-				delta := int64(metricValue.(metric.Counter))
-				metricDto = metric.MetricsDto{ID: metricName, MType: metricType, Delta: &delta}
+				delta := metricValue.(metric.Counter)
+				refDelta := int64(metricValue.(metric.Counter))
+				hash := a.Hash.GetCounterHash(ctx, metricName, delta)
+				metricDto = metric.MetricsDto{ID: metricName, MType: metricType, Delta: &refDelta, Hash: hash}
 			}
 
 			body, _ := json.Marshal(metricDto)

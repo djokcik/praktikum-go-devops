@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/djokcik/praktikum-go-devops/internal/metric"
 	"github.com/djokcik/praktikum-go-devops/internal/server/storage"
+	"github.com/djokcik/praktikum-go-devops/internal/service"
 	"github.com/djokcik/praktikum-go-devops/pkg/logging"
 	"github.com/rs/zerolog"
 )
@@ -16,13 +17,15 @@ type CounterService interface {
 	Update(ctx context.Context, name string, value metric.Counter) (bool, error)
 	List(ctx context.Context) ([]metric.Metric, error)
 	Increase(ctx context.Context, name string, value metric.Counter) error
+	Verify(ctx context.Context, name string, value metric.Counter, hash string) bool
 }
 
 type CounterServiceImpl struct {
+	Hash service.HashService
 	Repo storage.Repository
 }
 
-func (s *CounterServiceImpl) GetOne(ctx context.Context, name string) (metric.Counter, error) {
+func (s CounterServiceImpl) GetOne(ctx context.Context, name string) (metric.Counter, error) {
 	val, err := s.Repo.Get(ctx, &storage.GetRepositoryFilter{
 		Name: name,
 		Type: metric.CounterType,
@@ -40,7 +43,7 @@ func (s *CounterServiceImpl) GetOne(ctx context.Context, name string) (metric.Co
 	return val.(metric.Counter), nil
 }
 
-func (s *CounterServiceImpl) Update(ctx context.Context, name string, value metric.Counter) (bool, error) {
+func (s CounterServiceImpl) Update(ctx context.Context, name string, value metric.Counter) (bool, error) {
 	val, err := s.Repo.Update(ctx, name, value)
 	if err != nil {
 		return val, err
@@ -50,7 +53,7 @@ func (s *CounterServiceImpl) Update(ctx context.Context, name string, value metr
 	return val, nil
 }
 
-func (s *CounterServiceImpl) List(ctx context.Context) ([]metric.Metric, error) {
+func (s CounterServiceImpl) List(ctx context.Context) ([]metric.Metric, error) {
 	metrics, err := s.Repo.List(ctx, &storage.ListRepositoryFilter{Type: metric.CounterType})
 
 	if err != nil {
@@ -60,7 +63,7 @@ func (s *CounterServiceImpl) List(ctx context.Context) ([]metric.Metric, error) 
 	return metrics.([]metric.Metric), nil
 }
 
-func (s *CounterServiceImpl) Increase(ctx context.Context, name string, value metric.Counter) error {
+func (s CounterServiceImpl) Increase(ctx context.Context, name string, value metric.Counter) error {
 	val, err := s.GetOne(ctx, name)
 
 	if err != nil {
@@ -79,7 +82,12 @@ func (s *CounterServiceImpl) Increase(ctx context.Context, name string, value me
 	return nil
 }
 
-func (s *CounterServiceImpl) Log(ctx context.Context) *zerolog.Logger {
+func (s CounterServiceImpl) Verify(ctx context.Context, name string, value metric.Counter, hash string) bool {
+	actualHash := s.Hash.GetCounterHash(ctx, name, value)
+	return s.Hash.Verify(ctx, hash, actualHash)
+}
+
+func (s CounterServiceImpl) Log(ctx context.Context) *zerolog.Logger {
 	_, logger := logging.GetCtxLogger(ctx)
 	logger = logger.With().Str(logging.ServiceKey, "counter metric service").Logger()
 

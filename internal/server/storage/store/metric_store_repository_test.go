@@ -13,7 +13,7 @@ import (
 
 func TestMetricStoreFile_Configure(t *testing.T) {
 	t.Run("1. should  initialize fileReader and fileWriter", func(t *testing.T) {
-		store := &MetricStoreFile{Cfg: &server.Config{StoreFile: "mocks/testfile.txt"}}
+		store := &MetricStoreFile{Cfg: server.Config{StoreFile: "mocks/testfile.txt"}}
 		store.Configure(context.Background(), &sync.WaitGroup{})
 		defer os.Remove("mocks/testfile.txt")
 
@@ -22,7 +22,7 @@ func TestMetricStoreFile_Configure(t *testing.T) {
 	})
 
 	t.Run("2. should  not initialize fileReader and fileWriter", func(t *testing.T) {
-		store := &MetricStoreFile{Cfg: &server.Config{StoreFile: ""}}
+		store := &MetricStoreFile{Cfg: server.Config{StoreFile: ""}}
 		store.Configure(context.Background(), &sync.WaitGroup{})
 
 		require.Nil(t, store.FileWriter)
@@ -41,7 +41,7 @@ func TestMetricStoreFile_Configure(t *testing.T) {
 
 		db := model.Database{CounterMapMetric: counterMap, GaugeMapMetric: gaugeMap}
 
-		store := &MetricStoreFile{Cfg: &server.Config{StoreFile: "mocks/testfile.txt"}, DB: &db}
+		store := &MetricStoreFile{Cfg: server.Config{StoreFile: "mocks/testfile.txt"}, DB: &db}
 		store.Configure(ctx, &wg)
 		defer os.Remove("mocks/testfile.txt")
 
@@ -79,7 +79,7 @@ func TestMetricStoreFile_Configure(t *testing.T) {
 
 		db := model.Database{CounterMapMetric: make(map[string]metric.Counter), GaugeMapMetric: make(map[string]metric.Gauge)}
 
-		store := &MetricStoreFile{Cfg: &server.Config{StoreFile: "mocks/testfile.txt", Restore: true}, DB: &db}
+		store := &MetricStoreFile{Cfg: server.Config{StoreFile: "mocks/testfile.txt", Restore: true}, DB: &db}
 		store.Configure(context.Background(), &sync.WaitGroup{})
 
 		require.Equal(t, store.DB, &model.Database{CounterMapMetric: counterMap, GaugeMapMetric: gaugeMap})

@@ -81,7 +81,7 @@ func (w *metricFileStoreWriter) Close() error {
 
 type MetricStoreFile struct {
 	DB  *model.Database
-	Cfg *server.Config
+	Cfg server.Config
 
 	FileReader *metricFileStoreReader
 	FileWriter *metricFileStoreWriter

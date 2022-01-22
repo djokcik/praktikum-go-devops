@@ -22,7 +22,7 @@ type ListRepositoryFilter struct {
 }
 
 type Repository interface {
-	Configure(ctx context.Context, wg *sync.WaitGroup, db *model.Database, cfg *server.Config)
+	Configure(ctx context.Context, wg *sync.WaitGroup, db *model.Database, cfg server.Config)
 	Update(ctx context.Context, id interface{}, entity interface{}) (bool, error)
 	List(ctx context.Context, filter *ListRepositoryFilter) (interface{}, error)
 	Get(ctx context.Context, filter *GetRepositoryFilter) (interface{}, error)
@@ -32,7 +32,7 @@ type BaseRepository struct {
 	db *model.Database
 }
 
-func (r *BaseRepository) Configure(ctx context.Context, wg *sync.WaitGroup, db *model.Database, cfg *server.Config) {
+func (r *BaseRepository) Configure(ctx context.Context, wg *sync.WaitGroup, db *model.Database, cfg server.Config) {
 	r.db = db
 	db.CounterMapMetric = make(map[string]metric.Counter)
 	db.GaugeMapMetric = make(map[string]metric.Gauge)
@@ -42,7 +42,7 @@ type RepositoryRegistry struct {
 	registry map[string]Repository
 
 	db  *model.Database
-	cfg *server.Config
+	cfg server.Config
 }
 
 func (r *RepositoryRegistry) registerRepositories(ctx context.Context, wg *sync.WaitGroup, repositories []Repository) {
@@ -53,7 +53,7 @@ func (r *RepositoryRegistry) registerRepositories(ctx context.Context, wg *sync.
 	}
 }
 
-func NewRepositoryRegistry(ctx context.Context, wg *sync.WaitGroup, cfg *server.Config, db *model.Database, repository ...Repository) *RepositoryRegistry {
+func NewRepositoryRegistry(ctx context.Context, wg *sync.WaitGroup, cfg server.Config, db *model.Database, repository ...Repository) *RepositoryRegistry {
 	r := &RepositoryRegistry{
 		registry: map[string]Repository{},
 		db:       db,

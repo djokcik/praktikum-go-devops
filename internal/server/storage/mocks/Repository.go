@@ -21,7 +21,7 @@ type Repository struct {
 }
 
 // Configure provides a mock function with given fields: ctx, wg, db, cfg
-func (_m *Repository) Configure(ctx context.Context, wg *sync.WaitGroup, db *model.Database, cfg *server.Config) {
+func (_m *Repository) Configure(ctx context.Context, wg *sync.WaitGroup, db *model.Database, cfg server.Config) {
 	_m.Called(ctx, wg, db, cfg)
 }
 
