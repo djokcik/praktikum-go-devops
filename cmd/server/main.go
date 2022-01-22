@@ -30,6 +30,7 @@ func main() {
 	mux.Use(middleware.RequestID)
 	mux.Use(middleware.RealIP)
 	mux.Use(middleware.Recoverer)
+	mux.Use(serverMiddleware.GzipHandle)
 	mux.Use(serverMiddleware.LoggerMiddleware())
 
 	makeMetricRoutes(ctx, wg, mux, cfg)

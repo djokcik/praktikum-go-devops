@@ -39,6 +39,8 @@ func (h *Handler) ListHandler() http.HandlerFunc {
 			return
 		}
 
+		rw.Header().Set("Content-Type", "text/html")
+
 		err = tmpl.Execute(rw, listTemplateData{
 			GaugeMetrics:   gaugeMetrics,
 			CounterMetrics: counterMetrics,
