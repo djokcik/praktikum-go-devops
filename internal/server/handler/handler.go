@@ -5,7 +5,7 @@ import (
 	"github.com/djokcik/praktikum-go-devops/internal/server"
 	"github.com/djokcik/praktikum-go-devops/internal/server/service"
 	"github.com/djokcik/praktikum-go-devops/internal/server/storage"
-	service2 "github.com/djokcik/praktikum-go-devops/internal/service"
+	commonService "github.com/djokcik/praktikum-go-devops/internal/service"
 	"github.com/djokcik/praktikum-go-devops/pkg/logging"
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog"
@@ -13,13 +13,13 @@ import (
 
 type Handler struct {
 	*chi.Mux
-	Hash    service2.HashService
+	Hash    commonService.HashService
 	Counter service.CounterService
 	Gauge   service.GaugeService
 }
 
-func NewHandler(mux *chi.Mux, cfg server.Config, repo storage.Repository) *Handler {
-	hashService := &service2.HashServiceImpl{HashKey: cfg.Key}
+func NewHandler(mux *chi.Mux, cfg server.Config, repo storage.MetricRepository) *Handler {
+	hashService := &commonService.HashServiceImpl{HashKey: cfg.Key}
 
 	return &Handler{
 		Mux:     mux,

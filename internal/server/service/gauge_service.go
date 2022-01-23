@@ -21,7 +21,7 @@ type GaugeService interface {
 
 type GaugeServiceImpl struct {
 	Hash service.HashService
-	Repo storage.Repository
+	Repo storage.MetricRepository
 }
 
 func (s GaugeServiceImpl) Update(ctx context.Context, name string, value metric.Gauge) (bool, error) {
@@ -35,7 +35,7 @@ func (s GaugeServiceImpl) Update(ctx context.Context, name string, value metric.
 }
 
 func (s GaugeServiceImpl) GetOne(ctx context.Context, name string) (metric.Gauge, error) {
-	val, err := s.Repo.Get(ctx, &storage.GetRepositoryFilter{
+	val, err := s.Repo.Get(ctx, storage.GetRepositoryFilter{
 		Name: name,
 		Type: metric.GaugeType,
 	})
@@ -53,7 +53,7 @@ func (s GaugeServiceImpl) GetOne(ctx context.Context, name string) (metric.Gauge
 }
 
 func (s GaugeServiceImpl) List(ctx context.Context) ([]metric.Metric, error) {
-	metrics, err := s.Repo.List(ctx, &storage.ListRepositoryFilter{Type: metric.GaugeType})
+	metrics, err := s.Repo.List(ctx, storage.ListRepositoryFilter{Type: metric.GaugeType})
 	if err != nil {
 		return nil, err
 	}

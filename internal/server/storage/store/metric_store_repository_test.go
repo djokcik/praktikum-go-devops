@@ -39,7 +39,7 @@ func TestMetricStoreFile_Configure(t *testing.T) {
 		gaugeMap := make(map[string]metric.Gauge)
 		gaugeMap["testGauge"] = metric.Gauge(0.123)
 
-		db := model.Database{CounterMapMetric: counterMap, GaugeMapMetric: gaugeMap}
+		db := model.InMemoryDatabase{CounterMapMetric: counterMap, GaugeMapMetric: gaugeMap}
 
 		store := &MetricStoreFile{Cfg: server.Config{StoreFile: "mocks/testfile.txt"}, DB: &db}
 		store.Configure(ctx, &wg)
@@ -77,11 +77,11 @@ func TestMetricStoreFile_Configure(t *testing.T) {
 		writer.encoder.Encode(event)
 		writer.Close()
 
-		db := model.Database{CounterMapMetric: make(map[string]metric.Counter), GaugeMapMetric: make(map[string]metric.Gauge)}
+		db := model.InMemoryDatabase{CounterMapMetric: make(map[string]metric.Counter), GaugeMapMetric: make(map[string]metric.Gauge)}
 
 		store := &MetricStoreFile{Cfg: server.Config{StoreFile: "mocks/testfile.txt", Restore: true}, DB: &db}
 		store.Configure(context.Background(), &sync.WaitGroup{})
 
-		require.Equal(t, store.DB, &model.Database{CounterMapMetric: counterMap, GaugeMapMetric: gaugeMap})
+		require.Equal(t, store.DB, &model.InMemoryDatabase{CounterMapMetric: counterMap, GaugeMapMetric: gaugeMap})
 	})
 }

@@ -2,6 +2,7 @@ package server
 
 import (
 	"flag"
+	"fmt"
 	"github.com/caarlos0/env/v6"
 	"github.com/djokcik/praktikum-go-devops/pkg/logging"
 	"time"
@@ -13,6 +14,7 @@ type Config struct {
 	StoreFile     string        `env:"STORE_FILE"`
 	Restore       bool          `env:"RESTORE"`
 	Key           string        `env:"KEY"`
+	DatabaseDsn   string        `env:"DATABASE_DSN"`
 }
 
 func NewConfig() Config {
@@ -39,9 +41,20 @@ func (cfg *Config) parseEnv() {
 func (cfg *Config) parseFlags() {
 	flag.StringVar(&cfg.Address, "a", cfg.Address, "Server address")
 	flag.StringVar(&cfg.Key, "k", cfg.Key, "Hash key")
+	flag.StringVar(&cfg.DatabaseDsn, "d", cfg.Key, "Database dsn")
 	flag.DurationVar(&cfg.StoreInterval, "i", cfg.StoreInterval, "Store save interval")
 	flag.StringVar(&cfg.StoreFile, "f", cfg.StoreFile, "Store file")
 	flag.BoolVar(&cfg.Restore, "r", cfg.Restore, "Restore")
 
 	flag.Parse()
+}
+
+func (cfg Config) String() string {
+	return fmt.Sprintf("Start Server. "+
+		"Address: %s, "+
+		"StoreInterval: %s, "+
+		"StoreFile: %s, "+
+		"Restore: %v, "+
+		"DatabaseDsn: %s",
+		cfg.Address, cfg.StoreInterval, cfg.StoreFile, cfg.Restore, cfg.DatabaseDsn)
 }

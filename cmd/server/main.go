@@ -23,7 +23,7 @@ func main() {
 	logging.
 		NewLogger().
 		Info().
-		Msgf("Start Server. Address: %s, StoreInterval: %s, StoreFile: %s, Restore: %v", cfg.Address, cfg.StoreInterval, cfg.StoreFile, cfg.Restore)
+		Msgf("config: %v", cfg)
 
 	mux := chi.NewMux()
 

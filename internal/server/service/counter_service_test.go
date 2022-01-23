@@ -13,8 +13,8 @@ import (
 
 func TestCounterServiceImpl_GetOne(t *testing.T) {
 	t.Run("1. Should return metric", func(t *testing.T) {
-		m := mocks.Repository{Mock: mock.Mock{}}
-		m.On("Get", context.Background(), &storage.GetRepositoryFilter{
+		m := mocks.MetricRepository{Mock: mock.Mock{}}
+		m.On("Get", context.Background(), storage.GetRepositoryFilter{
 			Name: "TestMetric",
 			Type: metric.CounterType,
 		}).Return(metric.Counter(123), nil)
@@ -28,8 +28,8 @@ func TestCounterServiceImpl_GetOne(t *testing.T) {
 	})
 
 	t.Run("2. Should return error when repo return error", func(t *testing.T) {
-		m := mocks.Repository{Mock: mock.Mock{}}
-		m.On("Get", context.Background(), &storage.GetRepositoryFilter{
+		m := mocks.MetricRepository{Mock: mock.Mock{}}
+		m.On("Get", context.Background(), storage.GetRepositoryFilter{
 			Name: "TestMetric",
 			Type: metric.CounterType,
 		}).Return(nil, errors.New("testError"))
@@ -45,7 +45,7 @@ func TestCounterServiceImpl_GetOne(t *testing.T) {
 
 func TestCounterServiceImpl_Update(t *testing.T) {
 	t.Run("1. Should update metric", func(t *testing.T) {
-		m := mocks.Repository{Mock: mock.Mock{}}
+		m := mocks.MetricRepository{Mock: mock.Mock{}}
 		m.On("Update", context.Background(), "TestMetric", metric.Counter(123)).Return(true, nil)
 
 		service := CounterServiceImpl{Repo: &m}
@@ -62,8 +62,8 @@ func TestCounterServiceImpl_List(t *testing.T) {
 	t.Run("1. Should return list metrics", func(t *testing.T) {
 		metricList := []metric.Metric{{Name: "TestType", Value: "TestValue"}}
 
-		m := mocks.Repository{Mock: mock.Mock{}}
-		m.On("List", context.Background(), &storage.ListRepositoryFilter{Type: metric.CounterType}).Return(metricList, nil)
+		m := mocks.MetricRepository{Mock: mock.Mock{}}
+		m.On("List", context.Background(), storage.ListRepositoryFilter{Type: metric.CounterType}).Return(metricList, nil)
 
 		service := CounterServiceImpl{Repo: &m}
 
@@ -77,9 +77,9 @@ func TestCounterServiceImpl_List(t *testing.T) {
 
 func TestCounterServiceImpl_Increase(t *testing.T) {
 	t.Run("1. Should add value to old metric", func(t *testing.T) {
-		m := mocks.Repository{Mock: mock.Mock{}}
+		m := mocks.MetricRepository{Mock: mock.Mock{}}
 		m.On("Update", context.Background(), "TestMetric", metric.Counter(125)).Return(true, nil)
-		m.On("Get", context.Background(), &storage.GetRepositoryFilter{
+		m.On("Get", context.Background(), storage.GetRepositoryFilter{
 			Name: "TestMetric",
 			Type: metric.CounterType,
 		}).Return(metric.Counter(100), nil)
@@ -93,9 +93,9 @@ func TestCounterServiceImpl_Increase(t *testing.T) {
 	})
 
 	t.Run("2. Should update metric if didn`t find value in state", func(t *testing.T) {
-		m := mocks.Repository{Mock: mock.Mock{}}
+		m := mocks.MetricRepository{Mock: mock.Mock{}}
 		m.On("Update", context.Background(), "TestMetric", metric.Counter(25)).Return(true, nil)
-		m.On("Get", context.Background(), &storage.GetRepositoryFilter{
+		m.On("Get", context.Background(), storage.GetRepositoryFilter{
 			Name: "TestMetric",
 			Type: metric.CounterType,
 		}).Return(metric.Counter(0), storage.ErrValueNotFound)
@@ -109,9 +109,9 @@ func TestCounterServiceImpl_Increase(t *testing.T) {
 	})
 
 	t.Run("3. Should update metric if find value in state return error", func(t *testing.T) {
-		m := mocks.Repository{Mock: mock.Mock{}}
+		m := mocks.MetricRepository{Mock: mock.Mock{}}
 		m.On("Update", context.Background(), mock.Anything, mock.Anything).Return(true, nil)
-		m.On("Get", context.Background(), &storage.GetRepositoryFilter{
+		m.On("Get", context.Background(), storage.GetRepositoryFilter{
 			Name: "TestMetric",
 			Type: metric.CounterType,
 		}).Return(metric.Counter(0), errors.New("TestError"))

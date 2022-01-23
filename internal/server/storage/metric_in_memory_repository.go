@@ -17,19 +17,24 @@ var (
 	ErrValueNotFound = errors.New("value not found")
 )
 
-type MetricRepository struct {
-	BaseRepository
+type MetricInMemoryRepository struct {
 	Store store.MetricStore
+	db    *model.InMemoryDatabase
 }
 
-func (r *MetricRepository) Configure(ctx context.Context, wg *sync.WaitGroup, db *model.Database, cfg server.Config) {
-	r.BaseRepository.Configure(ctx, wg, db, cfg)
+func NewMetricInMemoryRepository(ctx context.Context, wg *sync.WaitGroup, cfg server.Config) MetricRepository {
+	r := &MetricInMemoryRepository{}
+	r.db = new(model.InMemoryDatabase)
+	r.db.CounterMapMetric = make(map[string]metric.Counter)
+	r.db.GaugeMapMetric = make(map[string]metric.Gauge)
 
-	r.Store = &store.MetricStoreFile{DB: db, Cfg: cfg}
+	r.Store = &store.MetricStoreFile{DB: r.db, Cfg: cfg}
 	r.Store.Configure(ctx, wg)
+
+	return r
 }
 
-func (r *MetricRepository) Update(ctx context.Context, name interface{}, value interface{}) (bool, error) {
+func (r *MetricInMemoryRepository) Update(ctx context.Context, name string, value interface{}) (bool, error) {
 	r.db.Lock()
 	defer r.db.Unlock()
 
@@ -37,9 +42,9 @@ func (r *MetricRepository) Update(ctx context.Context, name interface{}, value i
 	default:
 		return false, fmt.Errorf("entity could`t convert `%v` into available metric type", value)
 	case metric.Counter:
-		r.db.CounterMapMetric[name.(string)] = metricValue
+		r.db.CounterMapMetric[name] = metricValue
 	case metric.Gauge:
-		r.db.GaugeMapMetric[name.(string)] = metricValue
+		r.db.GaugeMapMetric[name] = metricValue
 	}
 
 	r.Store.NotifyUpdateDBValue(ctx)
@@ -48,7 +53,7 @@ func (r *MetricRepository) Update(ctx context.Context, name interface{}, value i
 	return true, nil
 }
 
-func (r *MetricRepository) List(ctx context.Context, filter *ListRepositoryFilter) (interface{}, error) {
+func (r MetricInMemoryRepository) List(ctx context.Context, filter ListRepositoryFilter) (interface{}, error) {
 	var metricList []metric.Metric
 
 	switch filter.Type {
@@ -69,12 +74,11 @@ func (r *MetricRepository) List(ctx context.Context, filter *ListRepositoryFilte
 	return metricList, nil
 }
 
-func (r *MetricRepository) Get(ctx context.Context, filter *GetRepositoryFilter) (interface{}, error) {
+func (r MetricInMemoryRepository) Get(ctx context.Context, filter GetRepositoryFilter) (interface{}, error) {
 	metricType := filter.Type
 	var value interface{}
 	var ok bool
 
-	// TODO use db that code will be more simply
 	switch metricType {
 	default:
 		return nil, fmt.Errorf("type `%v` isn`t avalilable metric type", filter.Type)
@@ -95,7 +99,7 @@ func (r *MetricRepository) Get(ctx context.Context, filter *GetRepositoryFilter)
 	return value, nil
 }
 
-func (r *MetricRepository) Log(ctx context.Context) *zerolog.Logger {
+func (r *MetricInMemoryRepository) Log(ctx context.Context) *zerolog.Logger {
 	_, logger := logging.GetCtxLogger(ctx)
 	logger = logger.With().Str(logging.ServiceKey, "metric repository").Logger()
 

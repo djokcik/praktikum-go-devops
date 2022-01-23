@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-type Database struct {
+type InMemoryDatabase struct {
 	sync.RWMutex
 	CounterMapMetric map[string]metric.Counter
 	GaugeMapMetric   map[string]metric.Gauge

@@ -13,7 +13,7 @@ import (
 
 func TestGaugeServiceImpl_Update(t *testing.T) {
 	t.Run("1. Should update metric", func(t *testing.T) {
-		m := mocks.Repository{Mock: mock.Mock{}}
+		m := mocks.MetricRepository{Mock: mock.Mock{}}
 		m.On("Update", context.Background(), "TestMetric", metric.Gauge(0.123)).Return(true, nil)
 
 		service := GaugeServiceImpl{Repo: &m}
@@ -28,8 +28,8 @@ func TestGaugeServiceImpl_Update(t *testing.T) {
 
 func TestGaugeServiceImpl_GetOne(t *testing.T) {
 	t.Run("1. Should return metric", func(t *testing.T) {
-		m := mocks.Repository{Mock: mock.Mock{}}
-		m.On("Get", context.Background(), &storage.GetRepositoryFilter{
+		m := mocks.MetricRepository{Mock: mock.Mock{}}
+		m.On("Get", context.Background(), storage.GetRepositoryFilter{
 			Name: "TestMetric",
 			Type: metric.GaugeType,
 		}).Return(metric.Gauge(0.123), nil)
@@ -43,8 +43,8 @@ func TestGaugeServiceImpl_GetOne(t *testing.T) {
 	})
 
 	t.Run("2. Should return error when repo return error", func(t *testing.T) {
-		m := mocks.Repository{Mock: mock.Mock{}}
-		m.On("Get", context.Background(), &storage.GetRepositoryFilter{
+		m := mocks.MetricRepository{Mock: mock.Mock{}}
+		m.On("Get", context.Background(), storage.GetRepositoryFilter{
 			Name: "TestMetric",
 			Type: metric.GaugeType,
 		}).Return(nil, errors.New("testError"))
@@ -62,8 +62,8 @@ func TestGaugeServiceImpl_List(t *testing.T) {
 	t.Run("1. Should return list metrics", func(t *testing.T) {
 		metricList := []metric.Metric{{Name: "TestType", Value: "TestValue"}}
 
-		m := mocks.Repository{Mock: mock.Mock{}}
-		m.On("List", context.Background(), &storage.ListRepositoryFilter{Type: metric.GaugeType}).Return(metricList, nil)
+		m := mocks.MetricRepository{Mock: mock.Mock{}}
+		m.On("List", context.Background(), storage.ListRepositoryFilter{Type: metric.GaugeType}).Return(metricList, nil)
 
 		service := GaugeServiceImpl{Repo: &m}
 

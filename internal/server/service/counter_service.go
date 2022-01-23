@@ -22,11 +22,11 @@ type CounterService interface {
 
 type CounterServiceImpl struct {
 	Hash service.HashService
-	Repo storage.Repository
+	Repo storage.MetricRepository
 }
 
 func (s CounterServiceImpl) GetOne(ctx context.Context, name string) (metric.Counter, error) {
-	val, err := s.Repo.Get(ctx, &storage.GetRepositoryFilter{
+	val, err := s.Repo.Get(ctx, storage.GetRepositoryFilter{
 		Name: name,
 		Type: metric.CounterType,
 	})
@@ -54,7 +54,7 @@ func (s CounterServiceImpl) Update(ctx context.Context, name string, value metri
 }
 
 func (s CounterServiceImpl) List(ctx context.Context) ([]metric.Metric, error) {
-	metrics, err := s.Repo.List(ctx, &storage.ListRepositoryFilter{Type: metric.CounterType})
+	metrics, err := s.Repo.List(ctx, storage.ListRepositoryFilter{Type: metric.CounterType})
 
 	if err != nil {
 		return nil, err
