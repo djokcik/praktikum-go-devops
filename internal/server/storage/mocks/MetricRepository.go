@@ -60,6 +60,20 @@ func (_m *MetricRepository) List(ctx context.Context, filter storage.ListReposit
 	return r0, r1
 }
 
+// Ping provides a mock function with given fields: ctx
+func (_m *MetricRepository) Ping(ctx context.Context) error {
+	ret := _m.Called(ctx)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context) error); ok {
+		r0 = rf(ctx)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Update provides a mock function with given fields: ctx, name, entity
 func (_m *MetricRepository) Update(ctx context.Context, name string, entity interface{}) (bool, error) {
 	ret := _m.Called(ctx, name, entity)
