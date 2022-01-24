@@ -83,7 +83,7 @@ func NewMetricRepository(ctx context.Context, wg *sync.WaitGroup, cfg server.Con
 
 func (r *MetricRepositoryImpl) notifyUpdateDBValue(ctx context.Context) {
 	//if r.store != nil && r.cfg.StoreInterval == 0 {
-	if r.store != nil {
+	if r.store != nil && (r.cfg.StoreInterval == 0 || r.cfg.DatabaseDsn != "") {
 		r.store.SaveDBValue(ctx)
 	}
 }
