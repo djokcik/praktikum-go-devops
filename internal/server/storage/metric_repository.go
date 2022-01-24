@@ -101,7 +101,7 @@ func (r *MetricRepositoryImpl) Update(ctx context.Context, name string, value in
 	}
 
 	r.notifyUpdateDBValue(ctx)
-	r.Log(ctx).Info().Msg("metric updated")
+	r.Log(ctx).Info().Msgf("metric updated %v %v", name, value)
 
 	return true, nil
 }

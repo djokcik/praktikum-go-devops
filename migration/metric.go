@@ -6,10 +6,9 @@ func CreateCounterTable(db *sql.DB) error {
 	query := `
 create table counter_metric
 (
-    id        integer not null
+    ID        varchar(255) not null
         constraint counter_metric_pk
             primary key,
-    type      varchar(255),
     value     int8
 );
 
@@ -24,10 +23,9 @@ func CreateGaugeTable(db *sql.DB) error {
 	query := `
 create table gauge_metric
 (
-	id        integer not null
+	ID        varchar(255) not null
         constraint gauge_metric_pk
             primary key,
-    type      varchar(255),
     value     double precision
 );
 `

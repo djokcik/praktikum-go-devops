@@ -13,9 +13,11 @@ import (
 	"github.com/rs/zerolog"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type metricDBStorer struct {
+	sync.RWMutex
 	inMemoryDB *model.InMemoryMetricDB
 	cfg        server.Config
 
@@ -51,7 +53,7 @@ func (s *metricDBStorer) RestoreDBValue(ctx context.Context) {
 
 	// COUNTER
 	{
-		rows, err := s.db.Query("SELECT type, value FROM counter_metric")
+		rows, err := s.db.Query("SELECT ID, value FROM counter_metric")
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -79,7 +81,7 @@ func (s *metricDBStorer) RestoreDBValue(ctx context.Context) {
 
 	// GAUGE
 	{
-		rows, err := s.db.Query("SELECT type, value FROM gauge_metric")
+		rows, err := s.db.Query("SELECT ID, value FROM gauge_metric")
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -109,20 +111,23 @@ func (s *metricDBStorer) RestoreDBValue(ctx context.Context) {
 }
 
 func (s metricDBStorer) SaveDBValue(ctx context.Context) {
+	s.RWMutex.Lock()
+	defer s.RWMutex.Unlock()
+
 	s.Log(ctx).Info().Msg("start save metrics to db")
 
 	// COUNTER
 	if len(s.inMemoryDB.CounterMapMetric) > 0 {
-		s.db.Exec("DELETE FROM counter_metric")
+		result, err := s.db.Exec("DELETE FROM counter_metric")
+		fmt.Println("delete", result, err)
 
-		sqlStr := "INSERT INTO counter_metric(id, type, value) VALUES "
+		sqlStr := "INSERT INTO counter_metric(ID, value) VALUES "
 		var vals []interface{}
 		var inserts []string
 
-		i := 1
 		for key, val := range s.inMemoryDB.CounterMapMetric {
-			inserts = append(inserts, "(?, ?, ?)")
-			vals = append(vals, i, key, int(val))
+			inserts = append(inserts, "(?, ?)")
+			vals = append(vals, key, int(val))
 		}
 
 		sqlStr = sqlStr + strings.Join(inserts, ",")
@@ -137,15 +142,13 @@ func (s metricDBStorer) SaveDBValue(ctx context.Context) {
 	if len(s.inMemoryDB.GaugeMapMetric) > 0 {
 		s.db.Exec("DELETE FROM gauge_metric")
 
-		sqlStr := "INSERT INTO gauge_metric(id, type, value) VALUES "
+		sqlStr := "INSERT INTO gauge_metric(ID, value) VALUES "
 		var vals []interface{}
 		var inserts []string
 
-		i := 1
 		for key, val := range s.inMemoryDB.GaugeMapMetric {
-			inserts = append(inserts, "(?, ?, ?)")
-			vals = append(vals, i, key, float64(val))
-			i += 1
+			inserts = append(inserts, "(?, ?)")
+			vals = append(vals, key, float64(val))
 		}
 
 		sqlStr = sqlStr + strings.Join(inserts, ",")
@@ -156,7 +159,29 @@ func (s metricDBStorer) SaveDBValue(ctx context.Context) {
 	}
 	//
 
-	s.Log(ctx).Info().Msg("finished save metrics to db")
+	{
+		s.Log(ctx).Info().Msg("finished save metrics to db")
+
+		rows, err := s.db.Query("SELECT ID, value FROM counter_metric")
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		defer rows.Close()
+
+		for rows.Next() {
+			var metricName string
+			var metricValue int
+
+			err = rows.Scan(&metricName, &metricValue)
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			fmt.Println(metricName, metricValue)
+		}
+	}
+
 }
 
 func ReplaceSQL(old, searchPattern string) string {
