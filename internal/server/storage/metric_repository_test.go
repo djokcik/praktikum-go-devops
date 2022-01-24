@@ -11,9 +11,9 @@ import (
 
 func newTestMetricRepository(ctx context.Context, db *model.InMemoryMetricDB, cfg server.Config) *MetricRepositoryImpl {
 	r := &MetricRepositoryImpl{}
-	r.inMemoryDb = db
-	r.inMemoryDb.CounterMapMetric = make(map[string]metric.Counter)
-	r.inMemoryDb.GaugeMapMetric = make(map[string]metric.Gauge)
+	r.inMemoryDB = db
+	r.inMemoryDB.CounterMapMetric = make(map[string]metric.Counter)
+	r.inMemoryDB.GaugeMapMetric = make(map[string]metric.Gauge)
 
 	r.store = nil
 

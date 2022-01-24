@@ -38,7 +38,7 @@ var (
 
 type MetricRepositoryImpl struct {
 	store      store.MetricStorer
-	inMemoryDb *model.InMemoryMetricDB
+	inMemoryDB *model.InMemoryMetricDB
 	cfg        server.Config
 }
 
@@ -46,14 +46,14 @@ func NewMetricRepository(ctx context.Context, wg *sync.WaitGroup, cfg server.Con
 	r := &MetricRepositoryImpl{}
 
 	r.cfg = cfg
-	r.inMemoryDb = new(model.InMemoryMetricDB)
-	r.inMemoryDb.CounterMapMetric = make(map[string]metric.Counter)
-	r.inMemoryDb.GaugeMapMetric = make(map[string]metric.Gauge)
+	r.inMemoryDB = new(model.InMemoryMetricDB)
+	r.inMemoryDB.CounterMapMetric = make(map[string]metric.Counter)
+	r.inMemoryDB.GaugeMapMetric = make(map[string]metric.Gauge)
 
 	if cfg.DatabaseDsn != "" {
-		r.store = store.NewMetricDbStorer(ctx, r.inMemoryDb, cfg)
+		r.store = store.NewMetricDBStorer(ctx, r.inMemoryDB, cfg)
 	} else if cfg.StoreFile != "" {
-		r.store = store.NewMetricFileStorer(ctx, r.inMemoryDb, cfg)
+		r.store = store.NewMetricFileStorer(ctx, r.inMemoryDB, cfg)
 	} else {
 		r.Log(ctx).Info().Msg("save metrics to store are disabled")
 		r.store = nil
@@ -88,16 +88,16 @@ func (r *MetricRepositoryImpl) notifyUpdateDBValue(ctx context.Context) {
 }
 
 func (r *MetricRepositoryImpl) Update(ctx context.Context, name string, value interface{}) (bool, error) {
-	r.inMemoryDb.Lock()
-	defer r.inMemoryDb.Unlock()
+	r.inMemoryDB.Lock()
+	defer r.inMemoryDB.Unlock()
 
 	switch metricValue := value.(type) {
 	default:
 		return false, fmt.Errorf("entity could`t convert `%v` into available metric type", value)
 	case metric.Counter:
-		r.inMemoryDb.CounterMapMetric[name] = metricValue
+		r.inMemoryDB.CounterMapMetric[name] = metricValue
 	case metric.Gauge:
-		r.inMemoryDb.GaugeMapMetric[name] = metricValue
+		r.inMemoryDB.GaugeMapMetric[name] = metricValue
 	}
 
 	r.notifyUpdateDBValue(ctx)
@@ -113,11 +113,11 @@ func (r MetricRepositoryImpl) List(ctx context.Context, filter ListRepositoryFil
 	default:
 		return nil, fmt.Errorf("type `%v` isn`t avalilable metric type", filter.Type)
 	case metric.GaugeType:
-		for metricName, metricValue := range r.inMemoryDb.GaugeMapMetric {
+		for metricName, metricValue := range r.inMemoryDB.GaugeMapMetric {
 			metricList = append(metricList, metric.Metric{Name: metricName, Value: metricValue})
 		}
 	case metric.CounterType:
-		for metricName, metricValue := range r.inMemoryDb.CounterMapMetric {
+		for metricName, metricValue := range r.inMemoryDB.CounterMapMetric {
 			metricList = append(metricList, metric.Metric{Name: metricName, Value: metricValue})
 		}
 	}
@@ -140,12 +140,12 @@ func (r MetricRepositoryImpl) Get(ctx context.Context, filter GetRepositoryFilte
 	default:
 		return nil, fmt.Errorf("type `%v` isn`t avalilable metric type", filter.Type)
 	case metric.GaugeType:
-		value, ok = r.inMemoryDb.GaugeMapMetric[filter.Name]
+		value, ok = r.inMemoryDB.GaugeMapMetric[filter.Name]
 		if !ok {
 			return 0, ErrValueNotFound
 		}
 	case metric.CounterType:
-		value, ok = r.inMemoryDb.CounterMapMetric[filter.Name]
+		value, ok = r.inMemoryDB.CounterMapMetric[filter.Name]
 		if !ok {
 			return 0, ErrValueNotFound
 		}

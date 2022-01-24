@@ -9,8 +9,8 @@ create table counter_metric
     id        integer not null
         constraint counter_metric_pk
             primary key,
-    type      varchar(20),
-    value     integer
+    type      varchar(255),
+    value     int8
 );
 
 `
@@ -27,8 +27,8 @@ create table gauge_metric
 	id        integer not null
         constraint gauge_metric_pk
             primary key,
-    type      varchar(20),
-    value     precision double
+    type      varchar(255),
+    value     double precision
 );
 `
 
