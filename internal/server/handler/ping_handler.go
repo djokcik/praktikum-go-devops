@@ -6,13 +6,13 @@ import (
 	"net/http"
 )
 
-func (h *Handler) PingHandler(repository *storage.MetricDatabaseRepository) http.HandlerFunc {
+func (h *Handler) PingHandler(repository storage.MetricRepository) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		logger := h.Log(ctx).With().Str(logging.ServiceKey, "Ping").Logger()
 		ctx = logging.SetCtxLogger(ctx, logger)
 
-		err := repository.Ping()
+		err := repository.Ping(ctx)
 		if err != nil {
 			h.Log(ctx).Error().Err(err).Msg("failed connect to database")
 			http.Error(rw, "failed to connect", http.StatusInternalServerError)
