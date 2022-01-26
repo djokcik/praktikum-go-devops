@@ -20,7 +20,7 @@ func TestHandler_GetJSONHandler(t *testing.T) {
 		h := Handler{Mux: chi.NewMux()}
 		h.Post("/update/", h.GetJSONHandler())
 
-		rBody, _ := json.Marshal(metric.MetricsDto{ID: "TestMetric", MType: "TestType"})
+		rBody, _ := json.Marshal(metric.MetricDto{ID: "TestMetric", MType: "TestType"})
 		request := httptest.NewRequest(http.MethodPost, "/update/", bytes.NewReader(rBody))
 
 		w := httptest.NewRecorder()
@@ -45,7 +45,7 @@ func TestHandler_GetJSONHandler(t *testing.T) {
 		h := Handler{Counter: &m, Hash: &mHash, Mux: chi.NewMux()}
 		h.Post("/update/", h.GetJSONHandler())
 
-		rBody, _ := json.Marshal(metric.MetricsDto{ID: "TestMetric", MType: "counter"})
+		rBody, _ := json.Marshal(metric.MetricDto{ID: "TestMetric", MType: "counter"})
 		request := httptest.NewRequest(http.MethodPost, "/update/", bytes.NewReader(rBody))
 
 		w := httptest.NewRecorder()
@@ -70,7 +70,7 @@ func TestHandler_GetJSONHandler(t *testing.T) {
 		h := Handler{Gauge: &m, Hash: &mHash, Mux: chi.NewMux()}
 		h.Post("/update/", h.GetJSONHandler())
 
-		rDto := metric.MetricsDto{ID: "TestMetric", MType: "gauge"}
+		rDto := metric.MetricDto{ID: "TestMetric", MType: "gauge"}
 		rBody, _ := json.Marshal(rDto)
 
 		request := httptest.NewRequest(http.MethodPost, "/update/", bytes.NewReader(rBody))

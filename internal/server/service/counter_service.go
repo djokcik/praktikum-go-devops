@@ -4,7 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/djokcik/praktikum-go-devops/internal/metric"
-	"github.com/djokcik/praktikum-go-devops/internal/server/storage"
+	"github.com/djokcik/praktikum-go-devops/internal/server/storage/counterrepo"
+	"github.com/djokcik/praktikum-go-devops/internal/server/storage/storageconst"
 	"github.com/djokcik/praktikum-go-devops/internal/service"
 	"github.com/djokcik/praktikum-go-devops/pkg/logging"
 	"github.com/rs/zerolog"
@@ -14,7 +15,8 @@ import (
 
 type CounterService interface {
 	GetOne(ctx context.Context, name string) (metric.Counter, error)
-	Update(ctx context.Context, name string, value metric.Counter) (bool, error)
+	Update(ctx context.Context, name string, value metric.Counter) error
+	UpdateList(ctx context.Context, metrics []metric.CounterDto) error
 	List(ctx context.Context) ([]metric.Metric, error)
 	Increase(ctx context.Context, name string, value metric.Counter) error
 	Verify(ctx context.Context, name string, value metric.Counter, hash string) bool
@@ -22,57 +24,70 @@ type CounterService interface {
 
 type CounterServiceImpl struct {
 	Hash service.HashService
-	Repo storage.MetricRepository
+	Repo counterrepo.Repository
 }
 
 func (s CounterServiceImpl) GetOne(ctx context.Context, name string) (metric.Counter, error) {
-	val, err := s.Repo.Get(ctx, storage.GetRepositoryFilter{
-		Name: name,
-		Type: metric.CounterType,
-	})
+	val, err := s.Repo.Get(ctx, name)
 
 	if err != nil {
 		return metric.Counter(0), err
 	}
 
-	if _, ok := val.(metric.Counter); !ok {
-		s.Log(ctx).Error().Msgf("value %v isn`t type Counter", val)
-		return metric.Counter(0), errors.New("error parse counter value")
-	}
-
-	return val.(metric.Counter), nil
-}
-
-func (s CounterServiceImpl) Update(ctx context.Context, name string, value metric.Counter) (bool, error) {
-	val, err := s.Repo.Update(ctx, name, value)
-	if err != nil {
-		return val, err
-	}
-
-	s.Log(ctx).Info().Msg("metric updated")
 	return val, nil
 }
 
+func (s CounterServiceImpl) Update(ctx context.Context, name string, value metric.Counter) error {
+	err := s.Repo.Update(ctx, name, value)
+	if err != nil {
+		return err
+	}
+
+	s.Log(ctx).Info().Msg("metric updated")
+	return nil
+}
+
+func (s CounterServiceImpl) UpdateList(ctx context.Context, metrics []metric.CounterDto) error {
+	counterMap := make(map[string]metric.Counter)
+
+	for _, dto := range metrics {
+		counterMap[dto.Name] += dto.Value
+	}
+
+	metrics = make([]metric.CounterDto, 0)
+	for name, value := range counterMap {
+		metrics = append(metrics, metric.CounterDto{Name: name, Value: value})
+	}
+
+	err := s.Repo.UpdateList(ctx, metrics)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s CounterServiceImpl) List(ctx context.Context) ([]metric.Metric, error) {
-	metrics, err := s.Repo.List(ctx, storage.ListRepositoryFilter{Type: metric.CounterType})
+	metrics, err := s.Repo.List(ctx)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return metrics.([]metric.Metric), nil
+	return metrics, nil
 }
 
 func (s CounterServiceImpl) Increase(ctx context.Context, name string, value metric.Counter) error {
 	val, err := s.GetOne(ctx, name)
 
 	if err != nil {
-		if !errors.Is(err, storage.ErrValueNotFound) {
+		if !errors.Is(err, storageconst.ErrValueNotFound) {
 			return err
 		}
 	}
 
-	_, err = s.Update(ctx, name, val+value)
+	err = s.Update(ctx, name, val+value)
 	if err != nil {
 		return errors.New("invalid save metric")
 	}

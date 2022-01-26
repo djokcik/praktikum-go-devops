@@ -5,12 +5,16 @@ import (
 	"encoding/json"
 	"github.com/djokcik/praktikum-go-devops/internal/metric"
 	"github.com/djokcik/praktikum-go-devops/internal/server"
-	"github.com/djokcik/praktikum-go-devops/internal/server/storage/metricinmemory/storer"
-	"github.com/djokcik/praktikum-go-devops/internal/server/storage/model"
+	"github.com/djokcik/praktikum-go-devops/internal/server/storage/storer"
 	"github.com/djokcik/praktikum-go-devops/pkg/logging"
 	"github.com/rs/zerolog"
 	"os"
 )
+
+type inMemoryMetricDB struct {
+	CounterMapMetric map[string]metric.Counter
+	GaugeMapMetric   map[string]metric.Gauge
+}
 
 type storeEvent struct {
 	CounterMapMetric map[string]metric.Counter
@@ -72,15 +76,15 @@ func (w *metricFileStoreWriter) Close() error {
 }
 
 type MetricFileStorer struct {
-	inMemoryDB *model.InMemoryMetricDB
+	inMemoryDB *inMemoryMetricDB
 	cfg        server.Config
 
 	FileReader *metricFileStoreReader
 	FileWriter *metricFileStoreWriter
 }
 
-func NewMetricFileStorer(ctx context.Context, inMemoryDB *model.InMemoryMetricDB, cfg server.Config) storer.MetricStorer {
-	s := &MetricFileStorer{inMemoryDB: inMemoryDB, cfg: cfg}
+func NewMetricFileStorer(ctx context.Context, cfg server.Config) storer.MetricStorer {
+	s := &MetricFileStorer{inMemoryDB: &inMemoryMetricDB{}, cfg: cfg}
 	filename := cfg.StoreFile
 
 	reader, err := newMetricFileStoreReader(filename)
@@ -129,6 +133,14 @@ func (s *MetricFileStorer) RestoreDBValue(ctx context.Context) {
 
 		s.Log(ctx).Info().Msgf("metrics restored from file %s", s.cfg.StoreFile)
 	}
+}
+
+func (s *MetricFileStorer) SetCounterDB(counterMapMetric map[string]metric.Counter) {
+	s.inMemoryDB.CounterMapMetric = counterMapMetric
+}
+
+func (s *MetricFileStorer) SetGaugeDB(gaugeMapMetric map[string]metric.Gauge) {
+	s.inMemoryDB.GaugeMapMetric = gaugeMapMetric
 }
 
 func (s *MetricFileStorer) Close() {

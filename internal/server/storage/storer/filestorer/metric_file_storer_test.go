@@ -4,7 +4,6 @@ import (
 	context "context"
 	"github.com/djokcik/praktikum-go-devops/internal/metric"
 	"github.com/djokcik/praktikum-go-devops/internal/server"
-	"github.com/djokcik/praktikum-go-devops/internal/server/storage/model"
 	"github.com/stretchr/testify/require"
 	"os"
 	"testing"
@@ -12,7 +11,7 @@ import (
 
 func TestMetricStoreFile_Configure(t *testing.T) {
 	t.Run("1. should  initialize fileReader and fileWriter", func(t *testing.T) {
-		store := NewMetricFileStorer(context.Background(), nil, server.Config{StoreFile: "../mocks/testfile.txt"})
+		store := NewMetricFileStorer(context.Background(), server.Config{StoreFile: "../mocks/testfile.txt"})
 		fileStore := store.(*MetricFileStorer)
 		defer os.Remove("../mocks/testfile.txt")
 
@@ -35,12 +34,13 @@ func TestMetricStoreFile_Configure(t *testing.T) {
 		writer.encoder.Encode(event)
 		writer.Close()
 
-		db := model.InMemoryMetricDB{CounterMapMetric: make(map[string]metric.Counter), GaugeMapMetric: make(map[string]metric.Gauge)}
+		db := inMemoryMetricDB{CounterMapMetric: make(map[string]metric.Counter), GaugeMapMetric: make(map[string]metric.Gauge)}
 
-		store := NewMetricFileStorer(context.Background(), &db, server.Config{StoreFile: "../mocks/testfile.txt", Restore: true})
+		store := NewMetricFileStorer(context.Background(), server.Config{StoreFile: "../mocks/testfile.txt", Restore: true})
 		fileStore := store.(*MetricFileStorer)
+		fileStore.inMemoryDB = &db
 		fileStore.RestoreDBValue(context.Background())
 
-		require.Equal(t, fileStore.inMemoryDB, &model.InMemoryMetricDB{CounterMapMetric: counterMap, GaugeMapMetric: gaugeMap})
+		require.Equal(t, fileStore.inMemoryDB, &inMemoryMetricDB{CounterMapMetric: counterMap, GaugeMapMetric: gaugeMap})
 	})
 }

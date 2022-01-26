@@ -1,28 +1,27 @@
-package metricdatabase
+package gaugerepo
 
 import (
 	"context"
 	"database/sql"
 	"errors"
 	"github.com/djokcik/praktikum-go-devops/internal/metric"
-	"github.com/djokcik/praktikum-go-devops/internal/server/storage"
+	"github.com/djokcik/praktikum-go-devops/internal/server/storage/storageconst"
 	"github.com/djokcik/praktikum-go-devops/pkg/logging"
 	"github.com/rs/zerolog"
 )
 
-//go:generate mockery --name=gaugeDatabaseService --exported
-
-type gaugeDatabaseService interface {
-	Get(ctx context.Context, name string) (metric.Gauge, error)
-	List(ctx context.Context) ([]metric.Metric, error)
-	Update(ctx context.Context, name string, value metric.Gauge) error
-}
-
-type gaugeDatabaseServiceImpl struct {
+type postgresqlRepository struct {
 	db *sql.DB
 }
 
-func (g gaugeDatabaseServiceImpl) Get(ctx context.Context, name string) (metric.Gauge, error) {
+// NewPostgreSQL returns a new instance of Repository
+func NewPostgreSQL(db *sql.DB) Repository {
+	return &postgresqlRepository{
+		db: db,
+	}
+}
+
+func (g *postgresqlRepository) Get(ctx context.Context, name string) (metric.Gauge, error) {
 	row := g.db.QueryRowContext(ctx, "select value from gauge_metric where id = $1", name)
 	if row.Err() != nil {
 		g.Log(ctx).Error().Err(row.Err()).Msg("Get: query return error")
@@ -33,7 +32,7 @@ func (g gaugeDatabaseServiceImpl) Get(ctx context.Context, name string) (metric.
 	err := row.Scan(&metricValue)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return 0, storage.ErrValueNotFound
+			return 0, storageconst.ErrValueNotFound
 		}
 
 		g.Log(ctx).Error().Err(err).Msg("Get: scan return error")
@@ -43,7 +42,7 @@ func (g gaugeDatabaseServiceImpl) Get(ctx context.Context, name string) (metric.
 	return metricValue, nil
 }
 
-func (g gaugeDatabaseServiceImpl) List(ctx context.Context) ([]metric.Metric, error) {
+func (g *postgresqlRepository) List(ctx context.Context) ([]metric.Metric, error) {
 	var metricList []metric.Metric
 
 	rows, err := g.db.QueryContext(ctx, "select id, value from gauge_metric")
@@ -73,7 +72,7 @@ func (g gaugeDatabaseServiceImpl) List(ctx context.Context) ([]metric.Metric, er
 	return metricList, nil
 }
 
-func (g gaugeDatabaseServiceImpl) Update(ctx context.Context, name string, value metric.Gauge) error {
+func (g *postgresqlRepository) Update(ctx context.Context, name string, value metric.Gauge) error {
 	query := `INSERT INTO gauge_metric(id, value) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET value = excluded.value;`
 	_, err := g.db.ExecContext(ctx, query, name, value)
 	if err != nil {
@@ -84,7 +83,35 @@ func (g gaugeDatabaseServiceImpl) Update(ctx context.Context, name string, value
 	return nil
 }
 
-func (g gaugeDatabaseServiceImpl) Log(ctx context.Context) *zerolog.Logger {
+func (c *postgresqlRepository) UpdateList(ctx context.Context, metrics []metric.GaugeDto) error {
+	tx, err := c.db.BeginTx(ctx, nil)
+	if err != nil {
+		c.Log(ctx).Error().Err(err).Msgf("error start transaction")
+		return err
+	}
+
+	stmt, err := tx.Prepare("INSERT INTO gauge_metric(id, value) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET value = excluded.value")
+
+	for _, dto := range metrics {
+		if _, err := stmt.ExecContext(ctx, dto.Name, dto.Value); err != nil {
+			c.Log(ctx).Error().Err(err).Msgf("don`t save gauge metric %s with value %v", dto.Name, dto.Value)
+			if err = tx.Rollback(); err != nil {
+				c.Log(ctx).Error().Err(err).Msgf("update drivers: unable to rollback")
+				return err
+			}
+			return err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		c.Log(ctx).Error().Err(err).Msgf("update drivers: unable to commit")
+		return err
+	}
+
+	return nil
+}
+
+func (g *postgresqlRepository) Log(ctx context.Context) *zerolog.Logger {
 	_, logger := logging.GetCtxLogger(ctx)
 	logger = logger.With().Str(logging.ServiceKey, "gauge database repository").Logger()
 

@@ -1,22 +1,22 @@
-package metricdatabase
+package gaugerepo
 
 import (
 	"context"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/djokcik/praktikum-go-devops/internal/metric"
-	"github.com/djokcik/praktikum-go-devops/internal/server/storage"
+	"github.com/djokcik/praktikum-go-devops/internal/server/storage/storageconst"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
 
-func Test_gaugeDatabaseService_Get(t *testing.T) {
+func Test_postgresqlRepository_Get(t *testing.T) {
 	t.Run("1. should return gauge metric ", func(t *testing.T) {
 		db, mock, err := sqlmock.New()
 		if err != nil {
 			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 		}
 
-		service := &gaugeDatabaseServiceImpl{db: db}
+		service := &postgresqlRepository{db: db}
 
 		rows := sqlmock.NewRows([]string{"value"}).AddRow(metric.Gauge(0.123))
 		mock.ExpectQuery("select value from gauge_metric where id = \\$1").WithArgs("TestGauge").WillReturnRows(rows)
@@ -33,14 +33,14 @@ func Test_gaugeDatabaseService_Get(t *testing.T) {
 			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 		}
 
-		service := &gaugeDatabaseServiceImpl{db: db}
+		service := &postgresqlRepository{db: db}
 
 		rows := sqlmock.NewRows([]string{})
 		mock.ExpectQuery("select value from gauge_metric where id = \\$1").WithArgs("TestGauge").WillReturnRows(rows)
 
 		result, err := service.Get(context.Background(), "TestGauge")
 
-		require.Equal(t, err, storage.ErrValueNotFound)
+		require.Equal(t, err, storageconst.ErrValueNotFound)
 		require.Equal(t, result, metric.Gauge(0))
 	})
 
@@ -50,7 +50,7 @@ func Test_gaugeDatabaseService_Get(t *testing.T) {
 			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 		}
 
-		service := &gaugeDatabaseServiceImpl{db: db}
+		service := &postgresqlRepository{db: db}
 
 		rows := sqlmock.NewRows([]string{})
 		mock.
@@ -60,19 +60,19 @@ func Test_gaugeDatabaseService_Get(t *testing.T) {
 
 		result, err := service.Get(context.Background(), "TestGauge")
 
-		require.Equal(t, err, storage.ErrValueNotFound)
+		require.Equal(t, err, storageconst.ErrValueNotFound)
 		require.Equal(t, result, metric.Gauge(0))
 	})
 }
 
-func Test_gaugeDatabaseService_List(t *testing.T) {
+func Test_postgresqlRepository_List(t *testing.T) {
 	t.Run("1. should return list metrics", func(t *testing.T) {
 		db, mock, err := sqlmock.New()
 		if err != nil {
 			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 		}
 
-		service := &gaugeDatabaseServiceImpl{db: db}
+		service := &postgresqlRepository{db: db}
 
 		rows := sqlmock.
 			NewRows([]string{"id", "value"}).
@@ -91,14 +91,14 @@ func Test_gaugeDatabaseService_List(t *testing.T) {
 	})
 }
 
-func Test_gaugeDatabaseService_Update(t *testing.T) {
+func Test_postgresqlRepository_Update(t *testing.T) {
 	t.Run("1. should update metric", func(t *testing.T) {
 		db, mock, err := sqlmock.New()
 		if err != nil {
 			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 		}
 
-		service := &gaugeDatabaseServiceImpl{db: db}
+		service := &postgresqlRepository{db: db}
 
 		mock.
 			ExpectExec("INSERT INTO gauge_metric\\(id, value\\) VALUES \\(\\$1, \\$2\\) ON CONFLICT \\(id\\) DO UPDATE SET value = excluded.value").

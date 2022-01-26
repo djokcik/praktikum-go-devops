@@ -14,7 +14,7 @@ func (h *Handler) UpdateJSONHandler() http.HandlerFunc {
 		logger := h.Log(ctx).With().Str(logging.ServiceKey, "UpdateJSONHandler").Logger()
 		ctx = logging.SetCtxLogger(ctx, logger)
 
-		var metricDto metric.MetricsDto
+		var metricDto metric.MetricDto
 		err := json.NewDecoder(r.Body).Decode(&metricDto)
 		if err != nil {
 			http.Error(rw, err.Error(), http.StatusBadRequest)
@@ -51,7 +51,7 @@ func (h *Handler) UpdateJSONHandler() http.HandlerFunc {
 				return
 			}
 
-			_, err = h.Gauge.Update(ctx, name, value)
+			err = h.Gauge.Update(ctx, name, value)
 		}
 
 		if err != nil {

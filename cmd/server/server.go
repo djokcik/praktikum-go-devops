@@ -4,9 +4,9 @@ import (
 	"context"
 	"github.com/djokcik/praktikum-go-devops/internal/server"
 	"github.com/djokcik/praktikum-go-devops/internal/server/handler"
-	"github.com/djokcik/praktikum-go-devops/internal/server/storage"
-	"github.com/djokcik/praktikum-go-devops/internal/server/storage/metricdatabase"
-	"github.com/djokcik/praktikum-go-devops/internal/server/storage/metricinmemory"
+	"github.com/djokcik/praktikum-go-devops/internal/server/service"
+	"github.com/djokcik/praktikum-go-devops/internal/server/storage/reporegistry"
+	"github.com/djokcik/praktikum-go-devops/pkg/logging"
 	"github.com/go-chi/chi/v5"
 	"net/http"
 	"os"
@@ -14,22 +14,29 @@ import (
 )
 
 func makeMetricRoutes(ctx context.Context, wg *sync.WaitGroup, mux *chi.Mux, cfg server.Config) *handler.Handler {
-	var metricRepository storage.MetricRepository
-	var err error
+	var repoRegistry reporegistry.RepoRegistry
 
 	if cfg.DatabaseDsn != "" {
-		metricRepository, err = metricdatabase.NewRepository(ctx, cfg)
+		databaseService := service.NewDatabaseService(ctx, cfg)
+		db, err := databaseService.Open(ctx)
 		if err != nil {
+			logging.NewLogger().Fatal().Err(err).Msgf("Doesn`t open database connection")
 			os.Exit(1)
 		}
+
+		repoRegistry = reporegistry.NewPostgreSQL(ctx, db)
 	} else {
-		metricRepository = metricinmemory.NewRepository(ctx, wg, cfg)
+		repoRegistry = reporegistry.NewInMem(ctx, wg, cfg)
 	}
 
-	h := handler.NewHandler(mux, cfg, metricRepository)
+	h := handler.NewHandler(mux, cfg, repoRegistry)
 
 	h.Get("/", h.ListHandler())
-	h.Get("/ping", h.PingHandler(metricRepository))
+	h.Get("/ping", h.PingHandler(repoRegistry))
+
+	h.Route("/updates", func(r chi.Router) {
+		r.Post("/", h.UpdateListJSONHandler())
+	})
 
 	h.Route("/update", func(r chi.Router) {
 		r.Post("/", h.UpdateJSONHandler())

@@ -36,7 +36,7 @@ func TestHandler_UpdateJSONHandler(t *testing.T) {
 		h.Post("/update/", h.UpdateJSONHandler())
 
 		delta := int64(10)
-		rDto := metric.MetricsDto{ID: "TestMetric", MType: "TestType", Delta: &delta}
+		rDto := metric.MetricDto{ID: "TestMetric", MType: "TestType", Delta: &delta}
 		rBody, _ := json.Marshal(rDto)
 
 		request := httptest.NewRequest(http.MethodPost, "/update/", bytes.NewReader(rBody))
@@ -62,7 +62,7 @@ func TestHandler_UpdateJSONHandler(t *testing.T) {
 		h.Post("/update/", h.UpdateJSONHandler())
 
 		delta := int64(10)
-		rDto := metric.MetricsDto{ID: "TestMetric", MType: "counter", Delta: &delta, Hash: "myHash"}
+		rDto := metric.MetricDto{ID: "TestMetric", MType: "counter", Delta: &delta, Hash: "myHash"}
 		rBody, _ := json.Marshal(rDto)
 
 		request := httptest.NewRequest(http.MethodPost, "/update/", bytes.NewReader(rBody))
@@ -80,14 +80,14 @@ func TestHandler_UpdateJSONHandler(t *testing.T) {
 
 	t.Run("4. Should update gauge value", func(t *testing.T) {
 		m := mocks.GaugeService{Mock: mock.Mock{}}
-		m.On("Update", mock.Anything, "TestMetric", metric.Gauge(0.123)).Return(true, nil)
+		m.On("Update", mock.Anything, "TestMetric", metric.Gauge(0.123)).Return(nil)
 		m.On("Verify", mock.Anything, "TestMetric", metric.Gauge(0.123), "myHash").Return(true)
 
 		h := Handler{Gauge: &m, Mux: chi.NewMux()}
 		h.Post("/update/", h.UpdateJSONHandler())
 
 		delta := 0.123
-		rDto := metric.MetricsDto{ID: "TestMetric", MType: "gauge", Value: &delta, Hash: "myHash"}
+		rDto := metric.MetricDto{ID: "TestMetric", MType: "gauge", Value: &delta, Hash: "myHash"}
 		rBody, _ := json.Marshal(rDto)
 
 		request := httptest.NewRequest(http.MethodPost, "/update/", bytes.NewReader(rBody))

@@ -1,28 +1,27 @@
-package metricdatabase
+package counterrepo
 
 import (
 	"context"
 	"database/sql"
 	"errors"
 	"github.com/djokcik/praktikum-go-devops/internal/metric"
-	"github.com/djokcik/praktikum-go-devops/internal/server/storage"
+	"github.com/djokcik/praktikum-go-devops/internal/server/storage/storageconst"
 	"github.com/djokcik/praktikum-go-devops/pkg/logging"
 	"github.com/rs/zerolog"
 )
 
-//go:generate mockery --name=counterDatabaseService --exported
-
-type counterDatabaseService interface {
-	Get(ctx context.Context, name string) (metric.Counter, error)
-	List(ctx context.Context) ([]metric.Metric, error)
-	Update(ctx context.Context, name string, value metric.Counter) error
-}
-
-type counterDatabaseServiceImpl struct {
+type postgresqlRepository struct {
 	db *sql.DB
 }
 
-func (c counterDatabaseServiceImpl) Get(ctx context.Context, name string) (metric.Counter, error) {
+// NewPostgreSQL returns a new instance of Repository
+func NewPostgreSQL(db *sql.DB) Repository {
+	return &postgresqlRepository{
+		db: db,
+	}
+}
+
+func (c *postgresqlRepository) Get(ctx context.Context, name string) (metric.Counter, error) {
 	row := c.db.QueryRowContext(ctx, "select value from counter_metric where id = $1", name)
 	if row.Err() != nil {
 		c.Log(ctx).Error().Err(row.Err()).Msg("Get: query return error")
@@ -33,7 +32,7 @@ func (c counterDatabaseServiceImpl) Get(ctx context.Context, name string) (metri
 	err := row.Scan(&metricValue)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return 0, storage.ErrValueNotFound
+			return 0, storageconst.ErrValueNotFound
 		}
 
 		c.Log(ctx).Error().Err(err).Msg("Get: scan return error")
@@ -43,7 +42,7 @@ func (c counterDatabaseServiceImpl) Get(ctx context.Context, name string) (metri
 	return metricValue, nil
 }
 
-func (c counterDatabaseServiceImpl) List(ctx context.Context) ([]metric.Metric, error) {
+func (c *postgresqlRepository) List(ctx context.Context) ([]metric.Metric, error) {
 	var metricList []metric.Metric
 
 	rows, err := c.db.QueryContext(ctx, "select id, value from counter_metric")
@@ -73,7 +72,35 @@ func (c counterDatabaseServiceImpl) List(ctx context.Context) ([]metric.Metric, 
 	return metricList, nil
 }
 
-func (c counterDatabaseServiceImpl) Update(ctx context.Context, name string, value metric.Counter) error {
+func (c *postgresqlRepository) UpdateList(ctx context.Context, metrics []metric.CounterDto) error {
+	tx, err := c.db.BeginTx(ctx, nil)
+	if err != nil {
+		c.Log(ctx).Error().Err(err).Msgf("erro start transaction")
+		return err
+	}
+
+	stmt, err := tx.Prepare("INSERT INTO counter_metric(id, value) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET value = excluded.value")
+
+	for _, dto := range metrics {
+		if _, err := stmt.ExecContext(ctx, dto.Name, dto.Value); err != nil {
+			c.Log(ctx).Error().Err(err).Msgf("don`t save counter metric %s with value %v", dto.Name, dto.Value)
+			if err = tx.Rollback(); err != nil {
+				c.Log(ctx).Error().Err(err).Msgf("update drivers: unable to rollback")
+				return err
+			}
+			return err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		c.Log(ctx).Error().Err(err).Msgf("update drivers: unable to commit")
+		return err
+	}
+
+	return nil
+}
+
+func (c *postgresqlRepository) Update(ctx context.Context, name string, value metric.Counter) error {
 	query := `INSERT INTO counter_metric(id, value) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET value = excluded.value`
 	_, err := c.db.ExecContext(ctx, query, name, value)
 	if err != nil {
@@ -84,7 +111,7 @@ func (c counterDatabaseServiceImpl) Update(ctx context.Context, name string, val
 	return nil
 }
 
-func (c counterDatabaseServiceImpl) Log(ctx context.Context) *zerolog.Logger {
+func (c *postgresqlRepository) Log(ctx context.Context) *zerolog.Logger {
 	_, logger := logging.GetCtxLogger(ctx)
 	logger = logger.With().Str(logging.ServiceKey, "counter database repository").Logger()
 

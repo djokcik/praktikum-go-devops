@@ -3,7 +3,7 @@ package handler
 import (
 	"github.com/djokcik/praktikum-go-devops/internal/metric"
 	"github.com/djokcik/praktikum-go-devops/internal/server/service/mocks"
-	"github.com/djokcik/praktikum-go-devops/internal/server/storage"
+	"github.com/djokcik/praktikum-go-devops/internal/server/storage/storageconst"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -16,7 +16,7 @@ import (
 func TestHandler_GetCounterMetricHandler(t *testing.T) {
 	t.Run("1. Should return 404 when metric didn`t find", func(t *testing.T) {
 		m := mocks.CounterService{Mock: mock.Mock{}}
-		m.On("GetOne", mock.Anything, "TestName").Return(metric.Counter(0), storage.ErrValueNotFound)
+		m.On("GetOne", mock.Anything, "TestName").Return(metric.Counter(0), storageconst.ErrValueNotFound)
 
 		h := Handler{Counter: &m, Mux: chi.NewMux()}
 		request := httptest.NewRequest(http.MethodGet, "/value/counter/TestName", nil)
@@ -34,7 +34,7 @@ func TestHandler_GetCounterMetricHandler(t *testing.T) {
 
 	t.Run("2. Should return 404 when metric didn`t find", func(t *testing.T) {
 		m := mocks.CounterService{Mock: mock.Mock{}}
-		m.On("GetOne", mock.Anything, "TestName").Return(metric.Counter(0), storage.ErrValueNotFound)
+		m.On("GetOne", mock.Anything, "TestName").Return(metric.Counter(0), storageconst.ErrValueNotFound)
 
 		h := Handler{Counter: &m, Mux: chi.NewMux()}
 		request := httptest.NewRequest(http.MethodGet, "/value/counter/TestName", nil)
@@ -75,7 +75,7 @@ func TestHandler_GetGaugeMetricHandler(t *testing.T) {
 
 	t.Run("2. Should return 404 when metric didn`t find", func(t *testing.T) {
 		m := mocks.GaugeService{Mock: mock.Mock{}}
-		m.On("GetOne", mock.Anything, "TestName").Return(metric.Gauge(0), storage.ErrValueNotFound)
+		m.On("GetOne", mock.Anything, "TestName").Return(metric.Gauge(0), storageconst.ErrValueNotFound)
 
 		h := Handler{Gauge: &m, Mux: chi.NewMux()}
 		request := httptest.NewRequest(http.MethodGet, "/value/gauge/TestName", nil)

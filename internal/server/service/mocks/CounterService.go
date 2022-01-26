@@ -73,24 +73,31 @@ func (_m *CounterService) List(ctx context.Context) ([]metric.Metric, error) {
 }
 
 // Update provides a mock function with given fields: ctx, name, value
-func (_m *CounterService) Update(ctx context.Context, name string, value metric.Counter) (bool, error) {
+func (_m *CounterService) Update(ctx context.Context, name string, value metric.Counter) error {
 	ret := _m.Called(ctx, name, value)
 
-	var r0 bool
-	if rf, ok := ret.Get(0).(func(context.Context, string, metric.Counter) bool); ok {
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, metric.Counter) error); ok {
 		r0 = rf(ctx, name, value)
 	} else {
-		r0 = ret.Get(0).(bool)
+		r0 = ret.Error(0)
 	}
 
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string, metric.Counter) error); ok {
-		r1 = rf(ctx, name, value)
+	return r0
+}
+
+// UpdateList provides a mock function with given fields: ctx, metrics
+func (_m *CounterService) UpdateList(ctx context.Context, metrics []metric.CounterDto) error {
+	ret := _m.Called(ctx, metrics)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, []metric.CounterDto) error); ok {
+		r0 = rf(ctx, metrics)
 	} else {
-		r1 = ret.Error(1)
+		r0 = ret.Error(0)
 	}
 
-	return r0, r1
+	return r0
 }
 
 // Verify provides a mock function with given fields: ctx, name, value, hash

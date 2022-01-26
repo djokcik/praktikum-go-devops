@@ -30,7 +30,7 @@ func (a *agent) SendToServer(ctx context.Context) func() {
 
 			url := fmt.Sprintf("http://%s/update/", a.cfg.Address)
 
-			var metricDto metric.MetricsDto
+			var metricDto metric.MetricDto
 			switch metricType {
 			default:
 				a.Log(ctx).Error().Msgf("Invalid metric type: %s", metricType)
@@ -39,12 +39,12 @@ func (a *agent) SendToServer(ctx context.Context) func() {
 				value := metricValue.(metric.Gauge)
 				refValue := float64(value)
 				hash := a.Hash.GetGaugeHash(ctx, metricName, value)
-				metricDto = metric.MetricsDto{ID: metricName, MType: metricType, Value: &refValue, Hash: hash}
+				metricDto = metric.MetricDto{ID: metricName, MType: metricType, Value: &refValue, Hash: hash}
 			case metric.CounterType:
 				delta := metricValue.(metric.Counter)
 				refDelta := int64(metricValue.(metric.Counter))
 				hash := a.Hash.GetCounterHash(ctx, metricName, delta)
-				metricDto = metric.MetricsDto{ID: metricName, MType: metricType, Delta: &refDelta, Hash: hash}
+				metricDto = metric.MetricDto{ID: metricName, MType: metricType, Delta: &refDelta, Hash: hash}
 			}
 
 			body, _ := json.Marshal(metricDto)
