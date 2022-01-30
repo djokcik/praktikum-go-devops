@@ -80,6 +80,10 @@ func (c *postgresqlRepository) UpdateList(ctx context.Context, metrics []metric.
 	}
 
 	stmt, err := tx.Prepare("INSERT INTO counter_metric(id, value) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET value = excluded.value")
+	if err != nil {
+		c.Log(ctx).Error().Err(err).Msgf("error Prepare transaction")
+		return err
+	}
 
 	for _, dto := range metrics {
 		if _, err := stmt.ExecContext(ctx, dto.Name, dto.Value); err != nil {

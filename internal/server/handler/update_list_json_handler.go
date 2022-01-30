@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/djokcik/praktikum-go-devops/internal/metric"
 	"github.com/djokcik/praktikum-go-devops/pkg/logging"
 	"net/http"
@@ -17,6 +16,7 @@ func (h *Handler) UpdateListJSONHandler() http.HandlerFunc {
 		var metricsDto []metric.MetricDto
 		err := json.NewDecoder(r.Body).Decode(&metricsDto)
 		if err != nil {
+			h.Log(ctx).Error().Err(err).Msg("invalid save counter metrics")
 			http.Error(rw, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -24,7 +24,6 @@ func (h *Handler) UpdateListJSONHandler() http.HandlerFunc {
 		counterMetrics := make([]metric.CounterDto, 0)
 		for _, metricDto := range metricsDto {
 			if metricDto.MType == metric.CounterType {
-				fmt.Println(555, metricDto.MType, metricDto.ID, *metricDto.Delta)
 				name := metricDto.ID
 				value := metric.Counter(*metricDto.Delta)
 

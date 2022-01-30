@@ -32,9 +32,9 @@ func TestSendToServer(t *testing.T) {
 			defer req.Body.Close()
 			body, _ := io.ReadAll(req.Body)
 
-			require.Equal(t, string(body), `{"id":"TestMetric","type":"counter","delta":10}`)
+			require.Equal(t, string(body), `[{"id":"TestMetric","type":"counter","delta":10}]`)
 			require.Equal(t, req.Method, http.MethodPost)
-			require.Equal(t, req.URL.String(), "/update/")
+			require.Equal(t, req.URL.String(), "/updates/")
 			require.Equal(t, req.Header.Get("Content-Type"), "application/json")
 			// Send response to be tested
 			rw.Write([]byte(`OK`))
