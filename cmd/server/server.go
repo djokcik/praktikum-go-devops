@@ -18,7 +18,7 @@ func makeMetricRoutes(ctx context.Context, wg *sync.WaitGroup, mux *chi.Mux, cfg
 
 	if cfg.DatabaseDsn != "" {
 		databaseService := service.NewDatabaseService(ctx, cfg)
-		db, err := databaseService.Open(ctx)
+		db, err := databaseService.Open(ctx, wg)
 		if err != nil {
 			logging.NewLogger().Fatal().Err(err).Msgf("Doesn`t open database connection")
 			os.Exit(1)

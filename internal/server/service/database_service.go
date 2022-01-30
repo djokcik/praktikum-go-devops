@@ -8,12 +8,13 @@ import (
 	"github.com/djokcik/praktikum-go-devops/pkg/logging"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/rs/zerolog"
+	"sync"
 )
 
 //go:generate mockery --name=DatabaseService
 
 type DatabaseService interface {
-	Open(ctx context.Context) (*sql.DB, error)
+	Open(ctx context.Context, wg *sync.WaitGroup) (*sql.DB, error)
 }
 
 type databaseService struct {
@@ -24,7 +25,7 @@ func NewDatabaseService(_ context.Context, cfg server.Config) DatabaseService {
 	return &databaseService{cfg: cfg}
 }
 
-func (r databaseService) Open(ctx context.Context) (*sql.DB, error) {
+func (r databaseService) Open(ctx context.Context, wg *sync.WaitGroup) (*sql.DB, error) {
 	db, err := sql.Open("pgx", r.cfg.DatabaseDsn)
 	if err != nil {
 		r.Log(ctx).Fatal().Err(err).Msgf("Unable to connect to database")
@@ -41,8 +42,11 @@ func (r databaseService) Open(ctx context.Context) (*sql.DB, error) {
 		r.Log(ctx).Warn().Err(err).Msgf("couldn't create gauge table")
 	}
 
+	wg.Add(1)
 	go func() {
 		<-ctx.Done()
+		defer wg.Done()
+
 		db.Close()
 	}()
 

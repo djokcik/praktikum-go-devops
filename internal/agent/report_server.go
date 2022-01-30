@@ -2,7 +2,6 @@ package agent
 
 import (
 	"bytes"
-	"compress/gzip"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -53,27 +52,13 @@ func (a *agent) SendToServer(ctx context.Context) func() {
 
 		url := fmt.Sprintf("http://%s/updates/", a.cfg.Address)
 		body, _ := json.Marshal(metricDtoList)
-		var buf bytes.Buffer
-		g := gzip.NewWriter(&buf)
-
-		if _, err := g.Write(body); err != nil {
-			a.Log(ctx).Error().Err(err).Msg("Invalid Write gzip")
-			return
-		}
-
-		if err := g.Close(); err != nil {
-			a.Log(ctx).Error().Err(err).Msg("Invalid close gzip")
-			return
-		}
-
-		req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, &buf)
+		req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
 		if err != nil {
 			a.Log(ctx).Error().Err(err).Msg("request was interrupted")
 			return
 		}
 
 		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Content-Encoding", "gzip")
 
 		res, err := a.Client.Do(req)
 		if err != nil {
