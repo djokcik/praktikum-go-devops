@@ -4,7 +4,7 @@ import "database/sql"
 
 func CreateCounterTable(db *sql.DB) error {
 	query := `
-create table counter_metric
+create table if not exists counter_metric
 (
     ID        varchar(255) not null
         constraint counter_metric_pk
@@ -21,7 +21,7 @@ create table counter_metric
 
 func CreateGaugeTable(db *sql.DB) error {
 	query := `
-create table gauge_metric
+create table if not exists gauge_metric
 (
 	ID        varchar(255) not null
         constraint gauge_metric_pk

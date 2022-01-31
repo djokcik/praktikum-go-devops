@@ -2,7 +2,6 @@ package server
 
 import (
 	"flag"
-	"fmt"
 	"github.com/caarlos0/env/v6"
 	"github.com/djokcik/praktikum-go-devops/pkg/logging"
 	"time"
@@ -47,14 +46,4 @@ func (cfg *Config) parseFlags() {
 	flag.BoolVar(&cfg.Restore, "r", cfg.Restore, "Restore")
 
 	flag.Parse()
-}
-
-func (cfg Config) String() string {
-	return fmt.Sprintf("Start Server. "+
-		"Address: %s, "+
-		"StoreInterval: %s, "+
-		"StoreFile: %s, "+
-		"Restore: %v, "+
-		"DatabaseDsn: %s",
-		cfg.Address, cfg.StoreInterval, cfg.StoreFile, cfg.Restore, cfg.DatabaseDsn)
 }

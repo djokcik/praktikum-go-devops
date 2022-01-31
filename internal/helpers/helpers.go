@@ -11,14 +11,3 @@ func SetTicker(fn func(), seconds time.Duration) {
 		fn()
 	}
 }
-
-func Filter(arr []interface{}, f func(interface{}) bool) []interface{} {
-	filtered := make([]interface{}, 0)
-	for _, v := range arr {
-		if f(v) {
-			filtered = append(filtered, v)
-		}
-	}
-
-	return filtered
-}

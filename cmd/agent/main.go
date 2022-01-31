@@ -19,7 +19,7 @@ func main() {
 	logging.
 		NewLogger().
 		Info().
-		Msgf("Start Agent. Address: %s, PollInterval: %s, ReportInterval: %s", cfg.Address, cfg.PollInterval, cfg.ReportInterval)
+		Msgf("Config: %+v", cfg)
 
 	metricAgent := agent.NewAgent(cfg)
 

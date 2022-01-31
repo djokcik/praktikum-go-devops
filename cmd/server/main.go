@@ -23,7 +23,7 @@ func main() {
 	logging.
 		NewLogger().
 		Info().
-		Msgf("config: %v", cfg)
+		Msgf("config: %+v", cfg)
 
 	mux := chi.NewMux()
 
