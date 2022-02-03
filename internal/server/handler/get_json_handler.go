@@ -21,8 +21,6 @@ func (h *Handler) GetJSONHandler() http.HandlerFunc {
 			return
 		}
 
-		fmt.Println("metricDto", metricDto)
-
 		logger.UpdateContext(metricDto.GetLoggerContext)
 		ctx = logging.SetCtxLogger(ctx, logger)
 

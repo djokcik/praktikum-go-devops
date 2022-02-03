@@ -23,6 +23,7 @@ func main() {
 
 	metricAgent := agent.NewAgent(cfg)
 
+	go helpers.SetTicker(metricAgent.CollectPsutilMetrics(ctx), cfg.PollInterval)
 	go helpers.SetTicker(metricAgent.CollectMetrics(ctx), cfg.PollInterval)
 	go helpers.SetTicker(metricAgent.SendToServer(ctx), cfg.ReportInterval)
 
