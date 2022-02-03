@@ -9,7 +9,6 @@ import (
 	"github.com/shirou/gopsutil/cpu"
 	"net/http"
 	"sync"
-	"time"
 )
 
 //go:generate mockery --name=AgentMetric
@@ -85,7 +84,7 @@ func GetAgentMetrics() []AgentMetric {
 
 func GetAgentPsutilMetrics() []AgentMetric {
 	var agents []AgentMetric
-	percent, err := cpu.Percent(10*time.Second, true)
+	percent, err := cpu.Percent(0, true)
 	if err == nil {
 		for i := 0; i < len(percent); i++ {
 			agents = append(agents, metric.NewCPUUtilization(i, percent[i]))
