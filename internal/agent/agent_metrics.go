@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	"github.com/djokcik/praktikum-go-devops/internal/agent/metric"
+	"github.com/djokcik/praktikum-go-devops/internal/service"
 	"github.com/djokcik/praktikum-go-devops/pkg/logging"
 	"github.com/rs/zerolog"
 	"net/http"
@@ -13,16 +14,18 @@ import (
 type agent struct {
 	CollectedMetric map[string]SendAgentMetric
 	Client          *http.Client
+	Hash            service.HashService
 	metrics         []AgentMetric
-	cfg             *Config
+	cfg             Config
 }
 
-func NewAgent(cfg *Config) *agent {
+func NewAgent(cfg Config) *agent {
 	metricAgent := new(agent)
 	metricAgent.CollectedMetric = make(map[string]SendAgentMetric)
 	metricAgent.Client = &http.Client{}
 	metricAgent.metrics = GetAgentMetrics()
 	metricAgent.cfg = cfg
+	metricAgent.Hash = &service.HashServiceImpl{HashKey: cfg.Key}
 
 	return metricAgent
 }

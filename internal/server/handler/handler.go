@@ -2,8 +2,10 @@ package handler
 
 import (
 	"context"
+	"github.com/djokcik/praktikum-go-devops/internal/server"
 	"github.com/djokcik/praktikum-go-devops/internal/server/service"
-	"github.com/djokcik/praktikum-go-devops/internal/server/storage"
+	"github.com/djokcik/praktikum-go-devops/internal/server/storage/reporegistry"
+	commonService "github.com/djokcik/praktikum-go-devops/internal/service"
 	"github.com/djokcik/praktikum-go-devops/pkg/logging"
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog"
@@ -11,15 +13,19 @@ import (
 
 type Handler struct {
 	*chi.Mux
+	Hash    commonService.HashService
 	Counter service.CounterService
 	Gauge   service.GaugeService
 }
 
-func NewHandler(mux *chi.Mux, repo storage.Repository) *Handler {
+func NewHandler(mux *chi.Mux, cfg server.Config, repoRegistry reporegistry.RepoRegistry) *Handler {
+	hashService := &commonService.HashServiceImpl{HashKey: cfg.Key}
+
 	return &Handler{
 		Mux:     mux,
-		Counter: &service.CounterServiceImpl{Repo: repo},
-		Gauge:   &service.GaugeServiceImpl{Repo: repo},
+		Hash:    hashService,
+		Counter: &service.CounterServiceImpl{Repo: repoRegistry.GetCounterRepo(), Hash: hashService},
+		Gauge:   &service.GaugeServiceImpl{Repo: repoRegistry.GetGaugeRepo(), Hash: hashService},
 	}
 }
 

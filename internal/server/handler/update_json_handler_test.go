@@ -36,7 +36,7 @@ func TestHandler_UpdateJSONHandler(t *testing.T) {
 		h.Post("/update/", h.UpdateJSONHandler())
 
 		delta := int64(10)
-		rDto := metric.MetricsDto{ID: "TestMetric", MType: "TestType", Delta: &delta}
+		rDto := metric.MetricDto{ID: "TestMetric", MType: "TestType", Delta: &delta}
 		rBody, _ := json.Marshal(rDto)
 
 		request := httptest.NewRequest(http.MethodPost, "/update/", bytes.NewReader(rBody))
@@ -56,12 +56,13 @@ func TestHandler_UpdateJSONHandler(t *testing.T) {
 	t.Run("3. Should update counter value", func(t *testing.T) {
 		m := mocks.CounterService{Mock: mock.Mock{}}
 		m.On("Increase", mock.Anything, "TestMetric", metric.Counter(10)).Return(nil)
+		m.On("Verify", mock.Anything, "TestMetric", metric.Counter(10), "myHash").Return(true)
 
 		h := Handler{Counter: &m, Mux: chi.NewMux()}
 		h.Post("/update/", h.UpdateJSONHandler())
 
 		delta := int64(10)
-		rDto := metric.MetricsDto{ID: "TestMetric", MType: "counter", Delta: &delta}
+		rDto := metric.MetricDto{ID: "TestMetric", MType: "counter", Delta: &delta, Hash: "myHash"}
 		rBody, _ := json.Marshal(rDto)
 
 		request := httptest.NewRequest(http.MethodPost, "/update/", bytes.NewReader(rBody))
@@ -74,17 +75,19 @@ func TestHandler_UpdateJSONHandler(t *testing.T) {
 
 		require.Equal(t, res.StatusCode, http.StatusOK)
 		m.AssertNumberOfCalls(t, "Increase", 1)
+		m.AssertNumberOfCalls(t, "Verify", 1)
 	})
 
 	t.Run("4. Should update gauge value", func(t *testing.T) {
 		m := mocks.GaugeService{Mock: mock.Mock{}}
-		m.On("Update", mock.Anything, "TestMetric", metric.Gauge(0.123)).Return(true, nil)
+		m.On("Update", mock.Anything, "TestMetric", metric.Gauge(0.123)).Return(nil)
+		m.On("Verify", mock.Anything, "TestMetric", metric.Gauge(0.123), "myHash").Return(true)
 
 		h := Handler{Gauge: &m, Mux: chi.NewMux()}
 		h.Post("/update/", h.UpdateJSONHandler())
 
 		delta := 0.123
-		rDto := metric.MetricsDto{ID: "TestMetric", MType: "gauge", Value: &delta}
+		rDto := metric.MetricDto{ID: "TestMetric", MType: "gauge", Value: &delta, Hash: "myHash"}
 		rBody, _ := json.Marshal(rDto)
 
 		request := httptest.NewRequest(http.MethodPost, "/update/", bytes.NewReader(rBody))
@@ -97,5 +100,6 @@ func TestHandler_UpdateJSONHandler(t *testing.T) {
 
 		require.Equal(t, res.StatusCode, http.StatusOK)
 		m.AssertNumberOfCalls(t, "Update", 1)
+		m.AssertNumberOfCalls(t, "Verify", 1)
 	})
 }

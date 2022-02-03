@@ -25,7 +25,7 @@ func (h *Handler) GaugeHandler() http.HandlerFunc {
 			return
 		}
 
-		_, err = h.Gauge.Update(ctx, metricName, metric.Gauge(parseValue))
+		err = h.Gauge.Update(ctx, metricName, metric.Gauge(parseValue))
 		if err != nil {
 			h.Log(ctx).Err(err).Msgf("invalid save metricName: %s and metricValue: %s", metricName, metricValue)
 			http.Error(rw, "invalid save metric", http.StatusBadRequest)

@@ -10,7 +10,7 @@ import (
 
 func Test_updateMetrics(f *testing.T) {
 	f.Run("Should update mapMetrics from metrics", func(t *testing.T) {
-		metricAgent := NewAgent(&Config{})
+		metricAgent := NewAgent(Config{})
 
 		m := mocks.AgentMetric{Mock: mock.Mock{}}
 		m.On("Name").Return("TestName")

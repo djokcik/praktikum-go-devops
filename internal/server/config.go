@@ -12,9 +12,11 @@ type Config struct {
 	StoreInterval time.Duration `env:"STORE_INTERVAL"`
 	StoreFile     string        `env:"STORE_FILE"`
 	Restore       bool          `env:"RESTORE"`
+	Key           string        `env:"KEY"`
+	DatabaseDsn   string        `env:"DATABASE_DSN"`
 }
 
-func NewConfig() *Config {
+func NewConfig() Config {
 	cfg := Config{
 		Address:       "127.0.0.1:8080",
 		StoreInterval: 300 * time.Second,
@@ -25,7 +27,7 @@ func NewConfig() *Config {
 	cfg.parseFlags()
 	cfg.parseEnv()
 
-	return &cfg
+	return cfg
 }
 
 func (cfg *Config) parseEnv() {
@@ -37,6 +39,8 @@ func (cfg *Config) parseEnv() {
 
 func (cfg *Config) parseFlags() {
 	flag.StringVar(&cfg.Address, "a", cfg.Address, "Server address")
+	flag.StringVar(&cfg.Key, "k", cfg.Key, "Hash key")
+	flag.StringVar(&cfg.DatabaseDsn, "d", cfg.Key, "Database dsn")
 	flag.DurationVar(&cfg.StoreInterval, "i", cfg.StoreInterval, "Store save interval")
 	flag.StringVar(&cfg.StoreFile, "f", cfg.StoreFile, "Store file")
 	flag.BoolVar(&cfg.Restore, "r", cfg.Restore, "Restore")

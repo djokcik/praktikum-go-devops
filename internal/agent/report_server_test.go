@@ -14,7 +14,7 @@ import (
 
 func TestSendToServer(t *testing.T) {
 	t.Run("Should send metrics to server", func(t *testing.T) {
-		metricAgent := NewAgent(&Config{Address: "127.0.0.1:45555"})
+		metricAgent := NewAgent(Config{Address: "127.0.0.1:45555"})
 
 		collectedMap := make(map[string]SendAgentMetric)
 		collectedMap["TestMetric"] = SendAgentMetric{Name: "TestMetric", Type: "counter", Value: metric.Counter(10)}
@@ -32,9 +32,9 @@ func TestSendToServer(t *testing.T) {
 			defer req.Body.Close()
 			body, _ := io.ReadAll(req.Body)
 
-			require.Equal(t, string(body), `{"id":"TestMetric","type":"counter","delta":10}`)
+			require.Equal(t, string(body), `[{"id":"TestMetric","type":"counter","delta":10}]`)
 			require.Equal(t, req.Method, http.MethodPost)
-			require.Equal(t, req.URL.String(), "/update/")
+			require.Equal(t, req.URL.String(), "/updates/")
 			require.Equal(t, req.Header.Get("Content-Type"), "application/json")
 			// Send response to be tested
 			rw.Write([]byte(`OK`))

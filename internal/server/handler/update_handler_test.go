@@ -15,7 +15,7 @@ import (
 func TestHandler_GaugeHandler(t *testing.T) {
 	t.Run("1. Should update metric", func(t *testing.T) {
 		m := mocks.GaugeService{Mock: mock.Mock{}}
-		m.On("Update", mock.Anything, "Alloc", metric.Gauge(0.123)).Return(true, nil)
+		m.On("Update", mock.Anything, "Alloc", metric.Gauge(0.123)).Return(nil)
 
 		h := Handler{Gauge: &m, Mux: chi.NewMux()}
 		request := httptest.NewRequest(http.MethodPost, "/update/gauge/Alloc/0.123", nil)
@@ -33,7 +33,7 @@ func TestHandler_GaugeHandler(t *testing.T) {
 
 	t.Run("2. Should return error when value is string", func(t *testing.T) {
 		m := mocks.GaugeService{Mock: mock.Mock{}}
-		m.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
+		m.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 		h := Handler{Gauge: &m, Mux: chi.NewMux()}
 		request := httptest.NewRequest(http.MethodPost, "/update/gauge/Alloc/test", nil)
@@ -51,7 +51,7 @@ func TestHandler_GaugeHandler(t *testing.T) {
 
 	t.Run("3. Should return error when update was error", func(t *testing.T) {
 		m := mocks.GaugeService{Mock: mock.Mock{}}
-		m.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(false, errors.New("error"))
+		m.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(errors.New("error"))
 
 		h := Handler{Gauge: &m, Mux: chi.NewMux()}
 		request := httptest.NewRequest(http.MethodPost, "/update/gauge/Alloc/0.123", nil)

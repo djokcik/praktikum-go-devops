@@ -59,22 +59,43 @@ func (_m *GaugeService) List(ctx context.Context) ([]metric.Metric, error) {
 }
 
 // Update provides a mock function with given fields: ctx, name, value
-func (_m *GaugeService) Update(ctx context.Context, name string, value metric.Gauge) (bool, error) {
+func (_m *GaugeService) Update(ctx context.Context, name string, value metric.Gauge) error {
 	ret := _m.Called(ctx, name, value)
 
-	var r0 bool
-	if rf, ok := ret.Get(0).(func(context.Context, string, metric.Gauge) bool); ok {
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, metric.Gauge) error); ok {
 		r0 = rf(ctx, name, value)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UpdateList provides a mock function with given fields: ctx, metrics
+func (_m *GaugeService) UpdateList(ctx context.Context, metrics []metric.GaugeDto) error {
+	ret := _m.Called(ctx, metrics)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, []metric.GaugeDto) error); ok {
+		r0 = rf(ctx, metrics)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// Verify provides a mock function with given fields: ctx, name, value, hash
+func (_m *GaugeService) Verify(ctx context.Context, name string, value metric.Gauge, hash string) bool {
+	ret := _m.Called(ctx, name, value, hash)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(context.Context, string, metric.Gauge, string) bool); ok {
+		r0 = rf(ctx, name, value, hash)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string, metric.Gauge) error); ok {
-		r1 = rf(ctx, name, value)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
+	return r0
 }

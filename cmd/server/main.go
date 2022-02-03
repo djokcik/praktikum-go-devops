@@ -23,13 +23,14 @@ func main() {
 	logging.
 		NewLogger().
 		Info().
-		Msgf("Start Server. Address: %s, StoreInterval: %s, StoreFile: %s, Restore: %v", cfg.Address, cfg.StoreInterval, cfg.StoreFile, cfg.Restore)
+		Msgf("config: %+v", cfg)
 
 	mux := chi.NewMux()
 
 	mux.Use(middleware.RequestID)
 	mux.Use(middleware.RealIP)
 	mux.Use(middleware.Recoverer)
+	mux.Use(serverMiddleware.GzipHandle)
 	mux.Use(serverMiddleware.LoggerMiddleware())
 
 	makeMetricRoutes(ctx, wg, mux, cfg)

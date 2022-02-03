@@ -1,6 +1,8 @@
 package helpers
 
-import "time"
+import (
+	"time"
+)
 
 func SetTicker(fn func(), seconds time.Duration) {
 	ticker := time.NewTicker(seconds)

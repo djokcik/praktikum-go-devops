@@ -18,6 +18,8 @@ func (a *agent) SendToServer(ctx context.Context) func() {
 		ctx = logging.SetCtxLogger(ctx, logger)
 
 		a.Log(ctx).Info().Msg("Start send metrics")
+
+		var metricDtoList []metric.MetricDto
 		for _, sendMetric := range a.CollectedMetric {
 			if ctx.Err() != nil {
 				a.Log(ctx).Error().Err(ctx.Err())
@@ -28,42 +30,48 @@ func (a *agent) SendToServer(ctx context.Context) func() {
 			metricType := sendMetric.Type
 			metricValue := sendMetric.Value
 
-			url := fmt.Sprintf("http://%s/update/", a.cfg.Address)
-
-			var metricDto metric.MetricsDto
+			var metricDto metric.MetricDto
 			switch metricType {
 			default:
 				a.Log(ctx).Error().Msgf("Invalid metric type: %s", metricType)
 				continue
 			case metric.GaugeType:
-				value := float64(metricValue.(metric.Gauge))
-				metricDto = metric.MetricsDto{ID: metricName, MType: metricType, Value: &value}
+				value := metricValue.(metric.Gauge)
+				refValue := float64(value)
+				hash := a.Hash.GetGaugeHash(ctx, metricName, value)
+				metricDto = metric.MetricDto{ID: metricName, MType: metricType, Value: &refValue, Hash: hash}
 			case metric.CounterType:
-				delta := int64(metricValue.(metric.Counter))
-				metricDto = metric.MetricsDto{ID: metricName, MType: metricType, Delta: &delta}
+				delta := metricValue.(metric.Counter)
+				refDelta := int64(metricValue.(metric.Counter))
+				hash := a.Hash.GetCounterHash(ctx, metricName, delta)
+				metricDto = metric.MetricDto{ID: metricName, MType: metricType, Delta: &refDelta, Hash: hash}
 			}
 
-			body, _ := json.Marshal(metricDto)
-			req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
-			if err != nil {
-				a.Log(ctx).Error().Err(err).Msg("request was interrupted")
-				continue
-			}
-
-			req.Header.Set("Content-Type", "application/json")
-
-			res, err := a.Client.Do(req)
-			if err != nil {
-				a.Log(ctx).Error().Err(err).Msg("request ended with error")
-				continue
-			}
-
-			err = res.Body.Close()
-			if err != nil {
-				a.Log(ctx).Error().Err(err).Msg("read from body closed with error")
-				continue
-			}
+			metricDtoList = append(metricDtoList, metricDto)
 		}
+
+		url := fmt.Sprintf("http://%s/updates/", a.cfg.Address)
+		body, _ := json.Marshal(metricDtoList)
+		req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
+		if err != nil {
+			a.Log(ctx).Error().Err(err).Msg("request was interrupted")
+			return
+		}
+
+		req.Header.Set("Content-Type", "application/json")
+
+		res, err := a.Client.Do(req)
+		if err != nil {
+			a.Log(ctx).Error().Err(err).Msg("request ended with error")
+			return
+		}
+
+		err = res.Body.Close()
+		if err != nil {
+			a.Log(ctx).Error().Err(err).Msg("read from body closed with error")
+			return
+		}
+
 		a.Log(ctx).Info().Msg("Finished send metrics")
 	}
 }

@@ -14,12 +14,14 @@ func (h *Handler) GetJSONHandler() http.HandlerFunc {
 		logger := h.Log(ctx).With().Str(logging.ServiceKey, "GetJSONHandler").Logger()
 		ctx = logging.SetCtxLogger(ctx, logger)
 
-		var metricDto metric.MetricsDto
+		var metricDto metric.MetricDto
 		err := json.NewDecoder(r.Body).Decode(&metricDto)
 		if err != nil {
 			http.Error(rw, err.Error(), http.StatusBadRequest)
 			return
 		}
+
+		fmt.Println("metricDto", metricDto)
 
 		logger.UpdateContext(metricDto.GetLoggerContext)
 		ctx = logging.SetCtxLogger(ctx, logger)
@@ -36,11 +38,13 @@ func (h *Handler) GetJSONHandler() http.HandlerFunc {
 			delta := int64(val)
 
 			metricDto.Delta = &delta
+			metricDto.Hash = h.Hash.GetCounterHash(ctx, metricDto.ID, val)
 		case metric.GaugeType:
 			val, _ := h.Gauge.GetOne(ctx, metricDto.ID)
 			value := float64(val)
 
 			metricDto.Value = &value
+			metricDto.Hash = h.Hash.GetGaugeHash(ctx, metricDto.ID, val)
 		}
 
 		rw.Header().Set("Content-Type", "application/json")
