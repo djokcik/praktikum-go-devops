@@ -6,12 +6,15 @@ import (
 	"github.com/djokcik/praktikum-go-devops/internal/service"
 	"github.com/djokcik/praktikum-go-devops/pkg/logging"
 	"github.com/rs/zerolog"
+	"github.com/shirou/gopsutil/cpu"
 	"net/http"
+	"sync"
 )
 
 //go:generate mockery --name=AgentMetric
 
 type agent struct {
+	sync.RWMutex
 	CollectedMetric map[string]SendAgentMetric
 	Client          *http.Client
 	Hash            service.HashService
@@ -77,6 +80,18 @@ func GetAgentMetrics() []AgentMetric {
 		// Counter
 		new(metric.PollCount),
 	}
+}
+
+func GetAgentPsutilMetrics() []AgentMetric {
+	var agents []AgentMetric
+	percent, err := cpu.Percent(0, true)
+	if err == nil {
+		for i := 0; i < len(percent); i++ {
+			agents = append(agents, metric.NewCPUUtilization(i, percent[i]))
+		}
+	}
+
+	return append(agents, new(metric.FreeMemory), new(metric.TotalMemory))
 }
 
 func (a *agent) Log(ctx context.Context) *zerolog.Logger {

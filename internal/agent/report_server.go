@@ -19,6 +19,7 @@ func (a *agent) SendToServer(ctx context.Context) func() {
 
 		a.Log(ctx).Info().Msg("Start send metrics")
 
+		a.Lock()
 		var metricDtoList []metric.MetricDto
 		for _, sendMetric := range a.CollectedMetric {
 			if ctx.Err() != nil {
@@ -49,6 +50,7 @@ func (a *agent) SendToServer(ctx context.Context) func() {
 
 			metricDtoList = append(metricDtoList, metricDto)
 		}
+		a.Unlock()
 
 		url := fmt.Sprintf("http://%s/updates/", a.cfg.Address)
 		body, _ := json.Marshal(metricDtoList)
