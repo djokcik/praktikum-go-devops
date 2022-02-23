@@ -8,10 +8,11 @@ import (
 )
 
 type Config struct {
-	Address        string        `env:"ADDRESS"`
-	ReportInterval time.Duration `env:"REPORT_INTERVAL"`
-	PollInterval   time.Duration `env:"POLL_INTERVAL"`
-	Key            string        `env:"KEY"`
+	Address             string        `env:"ADDRESS"`
+	ReportInterval      time.Duration `env:"REPORT_INTERVAL"`
+	PollInterval        time.Duration `env:"POLL_INTERVAL"`
+	PollPsutilsInterval time.Duration `envDefault:"10s"`
+	Key                 string        `env:"KEY"`
 }
 
 func NewConfig() Config {
