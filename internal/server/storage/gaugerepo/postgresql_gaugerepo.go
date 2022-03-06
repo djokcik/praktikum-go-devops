@@ -96,6 +96,8 @@ func (g *postgresqlRepository) UpdateList(ctx context.Context, metrics []metric.
 		return err
 	}
 
+	defer stmt.Close()
+
 	for _, dto := range metrics {
 		if _, err := stmt.ExecContext(ctx, dto.Name, dto.Value); err != nil {
 			g.Log(ctx).Error().Err(err).Msgf("don`t save gauge metric %s with value %v", dto.Name, dto.Value)
