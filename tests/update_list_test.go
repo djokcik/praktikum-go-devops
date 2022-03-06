@@ -2,6 +2,10 @@ package tests
 
 import (
 	"bytes"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/djokcik/praktikum-go-devops/internal/server/handler"
 	"github.com/djokcik/praktikum-go-devops/internal/server/service"
 	counterrepomock "github.com/djokcik/praktikum-go-devops/internal/server/storage/counterrepo/mocks"
@@ -9,9 +13,6 @@ import (
 	commonService "github.com/djokcik/praktikum-go-devops/internal/service"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/mock"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 func BenchmarkUpdateListHandler(b *testing.B) {

@@ -10,6 +10,10 @@ import (
 	"github.com/rs/zerolog"
 )
 
+var (
+	_ Repository = (*postgresqlRepository)(nil)
+)
+
 type postgresqlRepository struct {
 	db *sql.DB
 }

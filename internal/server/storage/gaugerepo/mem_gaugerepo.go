@@ -16,6 +16,10 @@ type inmemDB struct {
 	data map[string]metric.Gauge
 }
 
+var (
+	_ Repository = (*inmemRepository)(nil)
+)
+
 type inmemRepository struct {
 	sync.RWMutex
 	db    inmemDB

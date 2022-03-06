@@ -13,6 +13,10 @@ import (
 	"sync"
 )
 
+var (
+	_ RepoRegistry = (*inmemRepoRegistry)(nil)
+)
+
 type inmemRepoRegistry struct {
 	counterRepo counterrepo.Repository
 	gaugeRepo   gaugerepo.Repository

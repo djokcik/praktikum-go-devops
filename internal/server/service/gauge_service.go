@@ -19,6 +19,10 @@ type GaugeService interface {
 	Verify(ctx context.Context, name string, value metric.Gauge, hash string) bool
 }
 
+var (
+	_ GaugeService = (*GaugeServiceImpl)(nil)
+)
+
 type GaugeServiceImpl struct {
 	Hash service.HashService
 	Repo gaugerepo.Repository

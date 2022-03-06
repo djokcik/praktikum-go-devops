@@ -22,6 +22,10 @@ type CounterService interface {
 	Verify(ctx context.Context, name string, value metric.Counter, hash string) bool
 }
 
+var (
+	_ CounterService = (*CounterServiceImpl)(nil)
+)
+
 type CounterServiceImpl struct {
 	Hash service.HashService
 	Repo counterrepo.Repository

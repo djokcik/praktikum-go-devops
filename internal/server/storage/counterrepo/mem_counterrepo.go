@@ -16,6 +16,10 @@ type inmemDB struct {
 	data map[string]metric.Counter
 }
 
+var (
+	_ Repository = (*inmemRepository)(nil)
+)
+
 type inmemRepository struct {
 	db    inmemDB
 	store storer.MetricStorer

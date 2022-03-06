@@ -7,6 +7,10 @@ import (
 	"github.com/djokcik/praktikum-go-devops/internal/server/storage/gaugerepo"
 )
 
+var (
+	_ RepoRegistry = (*postgresqlRepoRegistry)(nil)
+)
+
 type postgresqlRepoRegistry struct {
 	db *sql.DB
 }
