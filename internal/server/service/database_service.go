@@ -13,6 +13,7 @@ import (
 
 //go:generate mockery --name=DatabaseService
 
+// DatabaseService - iterface for database connection
 type DatabaseService interface {
 	Open(ctx context.Context, wg *sync.WaitGroup) (*sql.DB, error)
 }
@@ -25,6 +26,7 @@ func NewDatabaseService(_ context.Context, cfg server.Config) DatabaseService {
 	return &databaseService{cfg: cfg}
 }
 
+// Open - open database with migration
 func (r databaseService) Open(ctx context.Context, wg *sync.WaitGroup) (*sql.DB, error) {
 	db, err := sql.Open("pgx", r.cfg.DatabaseDsn)
 	if err != nil {

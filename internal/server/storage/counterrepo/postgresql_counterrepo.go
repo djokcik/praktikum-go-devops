@@ -25,6 +25,7 @@ func NewPostgreSQL(db *sql.DB) Repository {
 	}
 }
 
+// Get - return counter metric by name from database
 func (c *postgresqlRepository) Get(ctx context.Context, name string) (metric.Counter, error) {
 	row := c.db.QueryRowContext(ctx, "select value from counter_metric where id = $1", name)
 	if row.Err() != nil {
@@ -46,6 +47,7 @@ func (c *postgresqlRepository) Get(ctx context.Context, name string) (metric.Cou
 	return metricValue, nil
 }
 
+// List - return list counter metrics from database
 func (c *postgresqlRepository) List(ctx context.Context) ([]metric.Metric, error) {
 	var metricList []metric.Metric
 
@@ -76,6 +78,7 @@ func (c *postgresqlRepository) List(ctx context.Context) ([]metric.Metric, error
 	return metricList, nil
 }
 
+// UpdateList - update counter list metrics in database
 func (c *postgresqlRepository) UpdateList(ctx context.Context, metrics []metric.CounterDto) error {
 	tx, err := c.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -108,6 +111,7 @@ func (c *postgresqlRepository) UpdateList(ctx context.Context, metrics []metric.
 	return nil
 }
 
+// Update - update counter metric in database
 func (c *postgresqlRepository) Update(ctx context.Context, name string, value metric.Counter) error {
 	query := `INSERT INTO counter_metric(id, value) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET value = excluded.value`
 	_, err := c.db.ExecContext(ctx, query, name, value)

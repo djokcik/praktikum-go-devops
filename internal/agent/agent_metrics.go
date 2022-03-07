@@ -13,6 +13,16 @@ import (
 
 //go:generate mockery --name=AgentMetric
 
+var (
+	_ Agent = (*agent)(nil)
+)
+
+type Agent interface {
+	CollectMetrics(ctx context.Context) func()
+	CollectPsutilMetrics(ctx context.Context) func()
+	SendToServer(ctx context.Context) func()
+}
+
 type agent struct {
 	sync.RWMutex
 	CollectedMetric map[string]SendAgentMetric
@@ -22,13 +32,13 @@ type agent struct {
 	cfg             Config
 }
 
-func NewAgent(cfg Config) *agent {
+func NewAgent(cfg Config) Agent {
 	metricAgent := new(agent)
 	metricAgent.CollectedMetric = make(map[string]SendAgentMetric)
 	metricAgent.Client = &http.Client{}
 	metricAgent.metrics = GetAgentMetrics()
 	metricAgent.cfg = cfg
-	metricAgent.Hash = &service.HashServiceImpl{HashKey: cfg.Key}
+	metricAgent.Hash = service.NewHashService(cfg.Key)
 
 	return metricAgent
 }

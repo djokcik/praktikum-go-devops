@@ -1,3 +1,4 @@
+// Package service provides common services both client and server
 package service
 
 import (
@@ -13,6 +14,7 @@ import (
 
 //go:generate mockery --name=HashService
 
+// HashService interface which provide operations for metrics hash
 type HashService interface {
 	GetHash(ctx context.Context, str string) string
 	GetCounterHash(ctx context.Context, name string, value metric.Counter) string
@@ -20,11 +22,18 @@ type HashService interface {
 	Verify(ctx context.Context, expectedHash string, actualHash string) bool
 }
 
-type HashServiceImpl struct {
+// NewHashService constructor for HashService with hashKey
+// if hashKey is empty string it means hashKey is not use
+func NewHashService(hashKey string) HashService {
+	return &hashServiceImpl{HashKey: hashKey}
+}
+
+type hashServiceImpl struct {
 	HashKey string
 }
 
-func (s HashServiceImpl) GetHash(ctx context.Context, str string) string {
+// GetHash return hash from any string
+func (s hashServiceImpl) GetHash(_ context.Context, str string) string {
 	if s.HashKey == "" {
 		return ""
 	}
@@ -39,15 +48,18 @@ func (s HashServiceImpl) GetHash(ctx context.Context, str string) string {
 	return string(hash)
 }
 
-func (s HashServiceImpl) GetCounterHash(ctx context.Context, name string, value metric.Counter) string {
+// GetCounterHash return counter metric hash from name and value
+func (s hashServiceImpl) GetCounterHash(ctx context.Context, name string, value metric.Counter) string {
 	return s.GetHash(ctx, fmt.Sprintf("%s:counter:%d", name, value))
 }
 
-func (s HashServiceImpl) GetGaugeHash(ctx context.Context, name string, value metric.Gauge) string {
+// GetGaugeHash return gauge metric hash from name and value
+func (s hashServiceImpl) GetGaugeHash(ctx context.Context, name string, value metric.Gauge) string {
 	return s.GetHash(ctx, fmt.Sprintf("%s:gauge:%f", name, value))
 }
 
-func (s HashServiceImpl) Verify(ctx context.Context, expectedHash string, actualHash string) bool {
+// Verify checks equals expected and actual hash
+func (s hashServiceImpl) Verify(ctx context.Context, expectedHash string, actualHash string) bool {
 	if s.HashKey == "" {
 		return true
 	}
@@ -60,7 +72,8 @@ func (s HashServiceImpl) Verify(ctx context.Context, expectedHash string, actual
 	return true
 }
 
-func (s HashServiceImpl) Log(ctx context.Context) *zerolog.Logger {
+// Log return zerolog with configure service key
+func (s hashServiceImpl) Log(ctx context.Context) *zerolog.Logger {
 	_, logger := logging.GetCtxLogger(ctx)
 	logger = logger.With().Str(logging.ServiceKey, "hash service").Logger()
 

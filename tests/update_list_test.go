@@ -22,8 +22,8 @@ func BenchmarkUpdateListHandler(b *testing.B) {
 	gaugeRepoMock := gaugerepomock.Repository{Mock: mock.Mock{}}
 	gaugeRepoMock.On("UpdateList", mock.Anything, mock.Anything).Return(nil)
 
-	counter := service.CounterServiceImpl{Hash: &commonService.HashServiceImpl{}, Repo: &counterRepoMock}
-	gauge := service.GaugeServiceImpl{Hash: &commonService.HashServiceImpl{}, Repo: &gaugeRepoMock}
+	counter := service.CounterServiceImpl{Hash: commonService.NewHashService(""), Repo: &counterRepoMock}
+	gauge := service.GaugeServiceImpl{Hash: commonService.NewHashService(""), Repo: &gaugeRepoMock}
 
 	h := handler.Handler{Mux: chi.NewMux(), Counter: &counter, Gauge: &gauge}
 	h.Post("/updates/", h.UpdateListJSONHandler())

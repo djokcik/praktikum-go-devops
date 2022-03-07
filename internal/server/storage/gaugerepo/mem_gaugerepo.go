@@ -48,6 +48,7 @@ func (r *inmemRepository) notifyUpdateDBValue(ctx context.Context) {
 	}
 }
 
+// UpdateList - update list gauge metrics in memory
 func (r *inmemRepository) UpdateList(ctx context.Context, metrics []metric.GaugeDto) error {
 	r.Lock()
 	defer r.Unlock()
@@ -62,6 +63,7 @@ func (r *inmemRepository) UpdateList(ctx context.Context, metrics []metric.Gauge
 	return nil
 }
 
+// Update - update gauge metric in memory
 func (r *inmemRepository) Update(ctx context.Context, name string, value metric.Gauge) error {
 	r.Lock()
 	defer r.Unlock()
@@ -74,6 +76,7 @@ func (r *inmemRepository) Update(ctx context.Context, name string, value metric.
 	return nil
 }
 
+// List - return list metric from memory
 func (r *inmemRepository) List(ctx context.Context) ([]metric.Metric, error) {
 	var metricList []metric.Metric
 
@@ -86,6 +89,7 @@ func (r *inmemRepository) List(ctx context.Context) ([]metric.Metric, error) {
 	return metricList, nil
 }
 
+// Get - return gauge metric from memory
 func (r *inmemRepository) Get(ctx context.Context, name string) (metric.Gauge, error) {
 	value, ok := r.db.data[name]
 	if !ok {

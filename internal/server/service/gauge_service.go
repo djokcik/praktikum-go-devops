@@ -11,6 +11,7 @@ import (
 
 //go:generate mockery --name=GaugeService
 
+// GaugeService provide methods for control gauge metrics
 type GaugeService interface {
 	GetOne(ctx context.Context, name string) (metric.Gauge, error)
 	Update(ctx context.Context, name string, value metric.Gauge) error
@@ -28,6 +29,7 @@ type GaugeServiceImpl struct {
 	Repo gaugerepo.Repository
 }
 
+// Update - update gauge metric with name and value
 func (s GaugeServiceImpl) Update(ctx context.Context, name string, value metric.Gauge) error {
 	err := s.Repo.Update(ctx, name, value)
 	if err != nil {
@@ -38,6 +40,7 @@ func (s GaugeServiceImpl) Update(ctx context.Context, name string, value metric.
 	return nil
 }
 
+// UpdateList - update list gauge metrics with []metric.GaugeDto
 func (s GaugeServiceImpl) UpdateList(ctx context.Context, metrics []metric.GaugeDto) error {
 	err := s.Repo.UpdateList(ctx, metrics)
 
@@ -48,6 +51,7 @@ func (s GaugeServiceImpl) UpdateList(ctx context.Context, metrics []metric.Gauge
 	return nil
 }
 
+// GetOne - return metric by name
 func (s GaugeServiceImpl) GetOne(ctx context.Context, name string) (metric.Gauge, error) {
 	val, err := s.Repo.Get(ctx, name)
 
@@ -58,6 +62,7 @@ func (s GaugeServiceImpl) GetOne(ctx context.Context, name string) (metric.Gauge
 	return val, nil
 }
 
+// List - return list of gauge metrics
 func (s GaugeServiceImpl) List(ctx context.Context) ([]metric.Metric, error) {
 	metrics, err := s.Repo.List(ctx)
 	if err != nil {
@@ -67,6 +72,7 @@ func (s GaugeServiceImpl) List(ctx context.Context) ([]metric.Metric, error) {
 	return metrics, nil
 }
 
+// Verify - check equal hash and calculate metric hash
 func (s GaugeServiceImpl) Verify(ctx context.Context, name string, value metric.Gauge, hash string) bool {
 	actualHash := s.Hash.GetGaugeHash(ctx, name, value)
 	return s.Hash.Verify(ctx, hash, actualHash)

@@ -1,3 +1,4 @@
+// Package gaugerepo includes memory and postgresql storage
 package gaugerepo
 
 import (
@@ -7,6 +8,7 @@ import (
 
 //go:generate mockery --name=Repository
 
+// Repository - interface to database operation for counter repository
 type Repository interface {
 	Get(ctx context.Context, name string) (metric.Gauge, error)
 	List(ctx context.Context) ([]metric.Metric, error)

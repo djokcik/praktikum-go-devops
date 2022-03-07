@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+// PingHandler check connect to database or file storer
 func (h *Handler) PingHandler(registry reporegistry.RepoRegistry) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
