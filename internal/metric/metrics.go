@@ -7,17 +7,24 @@ import (
 
 //go:generate mockery --name=Metric
 
+// Metric struct with name and value any of metric
 type Metric struct {
 	Name  string
 	Value interface{}
 }
 
+// MetricDto for request agent to server
 type MetricDto struct {
-	ID    string   `json:"id"`              // имя метрики
-	MType string   `json:"type"`            // параметр, принимающий значение gauge или counter
-	Delta *int64   `json:"delta,omitempty"` // значение метрики в случае передачи counter
-	Value *float64 `json:"value,omitempty"` // значение метрики в случае передачи gauge
-	Hash  string   `json:"hash,omitempty"`  // значение хеш-функции
+	// metric name
+	ID string `json:"id"`
+	// metric type
+	MType string `json:"type"`
+	// value of metric if metric type is counter
+	Delta *int64 `json:"delta,omitempty"`
+	// value of metric if metric type is gauge
+	Value *float64 `json:"value,omitempty"`
+	// hash from metric type and value
+	Hash string `json:"hash,omitempty"`
 }
 
 func (o *MetricDto) GetLoggerContext(logCtx zerolog.Context) zerolog.Context {

@@ -8,6 +8,7 @@ import (
 	"strconv"
 )
 
+// GaugeHandler update gauge metric in row format
 func (h *Handler) GaugeHandler() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -38,6 +39,7 @@ func (h *Handler) GaugeHandler() http.HandlerFunc {
 	}
 }
 
+// CounterHandler update counter metric in row format
 func (h *Handler) CounterHandler() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

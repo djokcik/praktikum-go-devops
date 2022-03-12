@@ -7,6 +7,7 @@ import (
 	"net/http"
 )
 
+// UpdateListJSONHandler update list metrics in []metric.MetricDto format
 func (h *Handler) UpdateListJSONHandler() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

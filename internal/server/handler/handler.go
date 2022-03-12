@@ -1,3 +1,5 @@
+// Package handler is a collection of handlers for use get and save metric.
+// The packages includes handlers which update and get metrics in json and row format.
 package handler
 
 import (
@@ -11,6 +13,7 @@ import (
 	"github.com/rs/zerolog"
 )
 
+// Handler struct for all handlers and require DI dependencies
 type Handler struct {
 	*chi.Mux
 	Hash    commonService.HashService
@@ -18,8 +21,9 @@ type Handler struct {
 	Gauge   service.GaugeService
 }
 
+// NewHandler constructor for Handler
 func NewHandler(mux *chi.Mux, cfg server.Config, repoRegistry reporegistry.RepoRegistry) *Handler {
-	hashService := &commonService.HashServiceImpl{HashKey: cfg.Key}
+	hashService := commonService.NewHashService(cfg.Key)
 
 	return &Handler{
 		Mux:     mux,

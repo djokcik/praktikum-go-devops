@@ -7,6 +7,7 @@ import (
 
 //go:generate mockery --name=MetricStorer
 
+// MetricStorer - interface for control between file storage and inmemory storage
 type MetricStorer interface {
 	RestoreDBValue(ctx context.Context)
 	SaveDBValue(ctx context.Context)

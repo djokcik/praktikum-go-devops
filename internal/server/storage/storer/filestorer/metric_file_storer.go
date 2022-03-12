@@ -11,6 +11,10 @@ import (
 	"os"
 )
 
+var (
+	_ storer.MetricStorer = (*MetricFileStorer)(nil)
+)
+
 type inMemoryMetricDB struct {
 	CounterMapMetric map[string]metric.Counter
 	GaugeMapMetric   map[string]metric.Gauge

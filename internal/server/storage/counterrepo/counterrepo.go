@@ -1,3 +1,4 @@
+// Package counterrepo includes memory and postgresql storage
 package counterrepo
 
 import (
@@ -7,6 +8,7 @@ import (
 
 //go:generate mockery --name=Repository
 
+// Repository - interface to database operation for counter repository
 type Repository interface {
 	Get(ctx context.Context, name string) (metric.Counter, error)
 	List(ctx context.Context) ([]metric.Metric, error)

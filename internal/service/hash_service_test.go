@@ -9,7 +9,7 @@ import (
 
 func TestHashServiceImpl_GetCounterHash(t *testing.T) {
 	t.Run("1. Should return hash for Counter", func(t *testing.T) {
-		service := HashServiceImpl{HashKey: "test"}
+		service := NewHashService("test")
 
 		counterHash := service.GetCounterHash(context.Background(), "TestMetric", metric.Counter(10))
 		actualHash := service.GetHash(context.Background(), "TestMetric:counter:10")
@@ -18,7 +18,7 @@ func TestHashServiceImpl_GetCounterHash(t *testing.T) {
 	})
 
 	t.Run("2. Should return hash for Gauge", func(t *testing.T) {
-		service := HashServiceImpl{HashKey: "test"}
+		service := NewHashService("test")
 
 		gaugeHash := service.GetGaugeHash(context.Background(), "TestMetric", metric.Gauge(0.123))
 		actualHash := service.GetHash(context.Background(), "TestMetric:gauge:0.123000")
@@ -27,7 +27,7 @@ func TestHashServiceImpl_GetCounterHash(t *testing.T) {
 	})
 
 	t.Run("3. Should verify hash is truth", func(t *testing.T) {
-		service := HashServiceImpl{HashKey: "test"}
+		service := NewHashService("test")
 
 		hash := service.GetHash(context.Background(), "123")
 		hash2 := service.GetHash(context.Background(), "123")
@@ -38,7 +38,7 @@ func TestHashServiceImpl_GetCounterHash(t *testing.T) {
 	})
 
 	t.Run("4. Should verify hash is falsy", func(t *testing.T) {
-		service := HashServiceImpl{HashKey: "test"}
+		service := NewHashService("test")
 
 		hash := service.GetHash(context.Background(), "123")
 		hash2 := service.GetHash(context.Background(), "124")

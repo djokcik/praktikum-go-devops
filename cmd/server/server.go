@@ -8,6 +8,7 @@ import (
 	"github.com/djokcik/praktikum-go-devops/internal/server/storage/reporegistry"
 	"github.com/djokcik/praktikum-go-devops/pkg/logging"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"net/http"
 	"os"
 	"sync"
@@ -53,6 +54,8 @@ func makeMetricRoutes(ctx context.Context, wg *sync.WaitGroup, mux *chi.Mux, cfg
 		r.Get("/gauge/{name}", h.GetGaugeMetricHandler())
 		r.Get("/*", http.NotFound)
 	})
+
+	h.Mount("/debug", middleware.Profiler())
 
 	return h
 }

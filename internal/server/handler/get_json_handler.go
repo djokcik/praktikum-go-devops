@@ -8,6 +8,7 @@ import (
 	"net/http"
 )
 
+// GetJSONHandler return json handler all metrics
 func (h *Handler) GetJSONHandler() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

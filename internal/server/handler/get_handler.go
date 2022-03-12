@@ -7,6 +7,7 @@ import (
 	"strconv"
 )
 
+// GetCounterMetricHandler handler return counter metric
 func (h *Handler) GetCounterMetricHandler() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -32,6 +33,7 @@ func (h *Handler) GetCounterMetricHandler() http.HandlerFunc {
 	}
 }
 
+// GetGaugeMetricHandler handler return gauge metric
 func (h *Handler) GetGaugeMetricHandler() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

@@ -7,6 +7,7 @@ import (
 	"net/http"
 )
 
+// ListHandler return list of all metrics in html format
 func (h *Handler) ListHandler() http.HandlerFunc {
 	type listTemplateData struct {
 		CounterMetrics []metric.Metric

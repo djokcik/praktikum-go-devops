@@ -16,6 +16,10 @@ type inmemDB struct {
 	data map[string]metric.Counter
 }
 
+var (
+	_ Repository = (*inmemRepository)(nil)
+)
+
 type inmemRepository struct {
 	db    inmemDB
 	store storer.MetricStorer
@@ -43,6 +47,7 @@ func (r *inmemRepository) notifyUpdateDBValue(ctx context.Context) {
 	}
 }
 
+// UpdateList - update list gauges in memory
 func (r *inmemRepository) UpdateList(ctx context.Context, metrics []metric.CounterDto) error {
 	r.db.Lock()
 	defer r.db.Unlock()
@@ -57,6 +62,7 @@ func (r *inmemRepository) UpdateList(ctx context.Context, metrics []metric.Count
 	return nil
 }
 
+// Update - update counter metric by name in memory
 func (r *inmemRepository) Update(ctx context.Context, name string, value metric.Counter) error {
 	r.db.Lock()
 	defer r.db.Unlock()
@@ -69,6 +75,7 @@ func (r *inmemRepository) Update(ctx context.Context, name string, value metric.
 	return nil
 }
 
+// List - return list counter metrics from memory
 func (r *inmemRepository) List(ctx context.Context) ([]metric.Metric, error) {
 	var metricList []metric.Metric
 
@@ -81,6 +88,7 @@ func (r *inmemRepository) List(ctx context.Context) ([]metric.Metric, error) {
 	return metricList, nil
 }
 
+// Get - return counter metric by name from memory
 func (r *inmemRepository) Get(ctx context.Context, name string) (metric.Counter, error) {
 	value, ok := r.db.data[name]
 	if !ok {

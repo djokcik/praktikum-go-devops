@@ -10,6 +10,10 @@ import (
 	"github.com/rs/zerolog"
 )
 
+var (
+	_ Repository = (*postgresqlRepository)(nil)
+)
+
 type postgresqlRepository struct {
 	db *sql.DB
 }
@@ -21,6 +25,7 @@ func NewPostgreSQL(db *sql.DB) Repository {
 	}
 }
 
+// Get - return gauge metric from database
 func (g *postgresqlRepository) Get(ctx context.Context, name string) (metric.Gauge, error) {
 	row := g.db.QueryRowContext(ctx, "select value from gauge_metric where id = $1", name)
 	if row.Err() != nil {
@@ -42,6 +47,7 @@ func (g *postgresqlRepository) Get(ctx context.Context, name string) (metric.Gau
 	return metricValue, nil
 }
 
+// List - return list of gauge metric from database
 func (g *postgresqlRepository) List(ctx context.Context) ([]metric.Metric, error) {
 	var metricList []metric.Metric
 
@@ -72,6 +78,7 @@ func (g *postgresqlRepository) List(ctx context.Context) ([]metric.Metric, error
 	return metricList, nil
 }
 
+// Update - update gauge metric by name in database
 func (g *postgresqlRepository) Update(ctx context.Context, name string, value metric.Gauge) error {
 	query := `INSERT INTO gauge_metric(id, value) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET value = excluded.value;`
 	_, err := g.db.ExecContext(ctx, query, name, value)
@@ -83,6 +90,7 @@ func (g *postgresqlRepository) Update(ctx context.Context, name string, value me
 	return nil
 }
 
+// UpdateList - update list of gauge metrics in datab ase
 func (g *postgresqlRepository) UpdateList(ctx context.Context, metrics []metric.GaugeDto) error {
 	tx, err := g.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -95,6 +103,8 @@ func (g *postgresqlRepository) UpdateList(ctx context.Context, metrics []metric.
 		g.Log(ctx).Error().Err(err).Msgf("error Prepare transaction")
 		return err
 	}
+
+	defer stmt.Close()
 
 	for _, dto := range metrics {
 		if _, err := stmt.ExecContext(ctx, dto.Name, dto.Value); err != nil {

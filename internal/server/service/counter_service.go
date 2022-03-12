@@ -13,6 +13,7 @@ import (
 
 //go:generate mockery --name=CounterService
 
+// CounterService provide methods for control counter metrics
 type CounterService interface {
 	GetOne(ctx context.Context, name string) (metric.Counter, error)
 	Update(ctx context.Context, name string, value metric.Counter) error
@@ -22,11 +23,16 @@ type CounterService interface {
 	Verify(ctx context.Context, name string, value metric.Counter, hash string) bool
 }
 
+var (
+	_ CounterService = (*CounterServiceImpl)(nil)
+)
+
 type CounterServiceImpl struct {
 	Hash service.HashService
 	Repo counterrepo.Repository
 }
 
+// GetOne - return metric by name
 func (s CounterServiceImpl) GetOne(ctx context.Context, name string) (metric.Counter, error) {
 	val, err := s.Repo.Get(ctx, name)
 
@@ -37,6 +43,7 @@ func (s CounterServiceImpl) GetOne(ctx context.Context, name string) (metric.Cou
 	return val, nil
 }
 
+// Update - update counter metric with name and value
 func (s CounterServiceImpl) Update(ctx context.Context, name string, value metric.Counter) error {
 	err := s.Repo.Update(ctx, name, value)
 	if err != nil {
@@ -47,6 +54,7 @@ func (s CounterServiceImpl) Update(ctx context.Context, name string, value metri
 	return nil
 }
 
+// UpdateList - update list counter metrics with []metric.CounterDto
 func (s CounterServiceImpl) UpdateList(ctx context.Context, metrics []metric.CounterDto) error {
 	counterMap := make(map[string]metric.Counter)
 
@@ -68,6 +76,7 @@ func (s CounterServiceImpl) UpdateList(ctx context.Context, metrics []metric.Cou
 	return nil
 }
 
+// List - return list of counter metrics
 func (s CounterServiceImpl) List(ctx context.Context) ([]metric.Metric, error) {
 	metrics, err := s.Repo.List(ctx)
 
@@ -78,6 +87,7 @@ func (s CounterServiceImpl) List(ctx context.Context) ([]metric.Metric, error) {
 	return metrics, nil
 }
 
+// Increase - add value to previous value by name
 func (s CounterServiceImpl) Increase(ctx context.Context, name string, value metric.Counter) error {
 	val, err := s.GetOne(ctx, name)
 
@@ -97,6 +107,7 @@ func (s CounterServiceImpl) Increase(ctx context.Context, name string, value met
 	return nil
 }
 
+// Verify - check equal hash and calculate metric hash
 func (s CounterServiceImpl) Verify(ctx context.Context, name string, value metric.Counter, hash string) bool {
 	actualHash := s.Hash.GetCounterHash(ctx, name, value)
 	return s.Hash.Verify(ctx, hash, actualHash)
