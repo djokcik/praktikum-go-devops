@@ -10,11 +10,22 @@ import (
 	"syscall"
 )
 
+var (
+	buildVersion = "N/A"
+	buildDate    = "N/A"
+	buildCommit  = "N/A"
+)
+
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	var cfg = agent.NewConfig()
+	log := logging.NewLogger()
+
+	log.Info().Msgf("Build version: %s", buildVersion)
+	log.Info().Msgf("Build date: %s", buildDate)
+	log.Info().Msgf("Build commit: %s", buildCommit)
 
 	logging.
 		NewLogger().
@@ -31,5 +42,5 @@ func main() {
 
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	<-quit
-	logging.NewLogger().Info().Msg("Shutdown Agent ...")
+	log.Info().Msg("Shutdown Agent ...")
 }
