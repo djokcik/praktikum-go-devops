@@ -15,16 +15,23 @@ import (
 	"syscall"
 )
 
+var (
+	buildVersion = "N/A"
+	buildDate    = "N/A"
+	buildCommit  = "N/A"
+)
+
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	wg := &sync.WaitGroup{}
 
 	cfg := server.NewConfig()
+	log := logging.NewLogger()
 
-	logging.
-		NewLogger().
-		Info().
-		Msgf("config: %+v", cfg)
+	log.Info().Msgf("config: %+v", cfg)
+	log.Info().Msgf("Build version: %s", buildVersion)
+	log.Info().Msgf("Build date: %s", buildDate)
+	log.Info().Msgf("Build commit: %s", buildCommit)
 
 	mux := chi.NewMux()
 
@@ -39,7 +46,7 @@ func main() {
 	go func() {
 		err := http.ListenAndServe(cfg.Address, mux)
 		if err != nil {
-			logging.NewLogger().Fatal().Err(err).Msg("server stopped")
+			log.Fatal().Err(err).Msg("server stopped")
 		}
 
 	}()
@@ -49,6 +56,6 @@ func main() {
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	<-quit
 	cancel()
-	logging.NewLogger().Info().Msg("Shutdown Server ...")
+	log.Info().Msg("Shutdown Server ...")
 	wg.Wait()
 }
