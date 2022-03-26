@@ -1,9 +1,12 @@
 package handler
 
 import (
+	"crypto/rand"
+	"crypto/sha1"
 	"encoding/json"
 	"github.com/djokcik/praktikum-go-devops/internal/metric"
 	"github.com/djokcik/praktikum-go-devops/pkg/logging"
+	"io"
 	"net/http"
 )
 
@@ -15,11 +18,35 @@ func (h *Handler) UpdateListJSONHandler() http.HandlerFunc {
 		ctx = logging.SetCtxLogger(ctx, logger)
 
 		var metricsDto []metric.MetricDto
-		err := json.NewDecoder(r.Body).Decode(&metricsDto)
-		if err != nil {
-			h.Log(ctx).Error().Err(err).Msg("invalid save counter metrics")
-			http.Error(rw, err.Error(), http.StatusBadRequest)
-			return
+
+		if h.PrivateKey == nil {
+			err := json.NewDecoder(r.Body).Decode(&metricsDto)
+			if err != nil {
+				h.Log(ctx).Warn().Err(err).Msg("invalid decode metrics")
+				http.Error(rw, err.Error(), http.StatusBadRequest)
+				return
+			}
+		} else {
+			encryptedBody, err := io.ReadAll(r.Body)
+			if err != nil {
+				h.Log(ctx).Error().Err(err).Msg("invalid read body")
+				http.Error(rw, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			body, err := h.Hash.DecryptOAEP(sha1.New(), rand.Reader, h.PrivateKey, encryptedBody, nil)
+			if err != nil {
+				h.Log(ctx).Warn().Err(err).Msg("invalid decrypted body")
+				http.Error(rw, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			err = json.Unmarshal(body, &metricsDto)
+			if err != nil {
+				h.Log(ctx).Warn().Err(err).Msg("invalid decode metrics")
+				http.Error(rw, err.Error(), http.StatusBadRequest)
+				return
+			}
 		}
 
 		counterMetrics := make([]metric.CounterDto, 0)
@@ -51,7 +78,7 @@ func (h *Handler) UpdateListJSONHandler() http.HandlerFunc {
 		}
 
 		if len(counterMetrics) != 0 {
-			err = h.Counter.UpdateList(ctx, counterMetrics)
+			err := h.Counter.UpdateList(ctx, counterMetrics)
 			if err != nil {
 				h.Log(ctx).Error().Err(err).Msg("invalid save counter metrics")
 				http.Error(rw, "invalid save metrics", http.StatusBadRequest)
@@ -60,7 +87,7 @@ func (h *Handler) UpdateListJSONHandler() http.HandlerFunc {
 		}
 
 		if len(gaugeMetrics) != 0 {
-			err = h.Gauge.UpdateList(ctx, gaugeMetrics)
+			err := h.Gauge.UpdateList(ctx, gaugeMetrics)
 			if err != nil {
 				h.Log(ctx).Error().Err(err).Msg("invalid save gauge metrics")
 				http.Error(rw, "invalid save metrics", http.StatusBadRequest)

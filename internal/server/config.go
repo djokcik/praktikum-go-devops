@@ -1,11 +1,30 @@
 package server
 
 import (
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
+	"errors"
 	"flag"
 	"github.com/caarlos0/env/v6"
 	"github.com/djokcik/praktikum-go-devops/pkg/logging"
+	"os"
 	"time"
 )
+
+type RsaPrivateKey struct {
+	*rsa.PrivateKey
+}
+
+func (r *RsaPrivateKey) UnmarshalText(text []byte) error {
+	priv, err := parseRsaPrivateKeyFromPemStr(string(text))
+	if err != nil {
+		return err
+	}
+
+	r.PrivateKey = priv
+	return nil
+}
 
 type Config struct {
 	Address       string        `env:"ADDRESS"`
@@ -14,6 +33,7 @@ type Config struct {
 	Restore       bool          `env:"RESTORE"`
 	Key           string        `env:"KEY"`
 	DatabaseDsn   string        `env:"DATABASE_DSN"`
+	PrivateKey    RsaPrivateKey `env:"CRYPTO_KEY"`
 }
 
 func NewConfig() Config {
@@ -44,6 +64,34 @@ func (cfg *Config) parseFlags() {
 	flag.DurationVar(&cfg.StoreInterval, "i", cfg.StoreInterval, "Store save interval")
 	flag.StringVar(&cfg.StoreFile, "f", cfg.StoreFile, "Store file")
 	flag.BoolVar(&cfg.Restore, "r", cfg.Restore, "Restore")
+	flag.Func("c", "Private key file", func(s string) error {
+		priv, err := parseRsaPrivateKeyFromPemStr(s)
+		if err != nil {
+			return err
+		}
+
+		cfg.PrivateKey.PrivateKey = priv
+		return nil
+	})
 
 	flag.Parse()
+}
+
+func parseRsaPrivateKeyFromPemStr(fileName string) (*rsa.PrivateKey, error) {
+	privPEM, err := os.ReadFile(fileName)
+	if err != nil {
+		return nil, err
+	}
+
+	block, _ := pem.Decode(privPEM)
+	if block == nil {
+		return nil, errors.New("failed to parse PEM block containing the key")
+	}
+
+	priv, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return nil, err
+	}
+
+	return priv, nil
 }

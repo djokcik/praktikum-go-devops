@@ -3,6 +3,8 @@ package agent
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
+	"crypto/sha1"
 	"encoding/json"
 	"fmt"
 	"github.com/djokcik/praktikum-go-devops/internal/metric"
@@ -53,7 +55,20 @@ func (a *agent) SendToServer(ctx context.Context) func() {
 		a.Unlock()
 
 		url := fmt.Sprintf("http://%s/updates/", a.cfg.Address)
-		body, _ := json.Marshal(metricDtoList)
+		body, err := json.Marshal(metricDtoList)
+		if err != nil {
+			a.Log(ctx).Warn().Err(err).Msgf("invalid marshal json: %s", err)
+			return
+		}
+
+		if a.cfg.PublicKey.PublicKey != nil {
+			body, err = a.Hash.EncryptOAEP(sha1.New(), rand.Reader, a.cfg.PublicKey.PublicKey, body, nil)
+			if err != nil {
+				a.Log(ctx).Error().Err(err).Msgf("encrypt: %s", err)
+				return
+			}
+		}
+
 		req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
 		if err != nil {
 			a.Log(ctx).Error().Err(err).Msg("request was interrupted")
