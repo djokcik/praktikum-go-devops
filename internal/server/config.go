@@ -3,6 +3,7 @@ package server
 import (
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/json"
 	"encoding/pem"
 	"errors"
 	"flag"
@@ -51,20 +52,37 @@ func NewConfig() Config {
 }
 
 func (cfg *Config) parseEnv() {
-	err := env.Parse(cfg)
+	var err error
+
+	if path := os.Getenv("CONFIG"); path != "" {
+		err = cfg.parseConfigFile(path)
+		if err != nil {
+			logging.NewLogger().Fatal().Err(err).Msg("error parse config file")
+		}
+	}
+
+	err = env.Parse(cfg)
 	if err != nil {
 		logging.NewLogger().Fatal().Err(err).Msg("error parse environment")
 	}
 }
 
 func (cfg *Config) parseFlags() {
+	flag.Func("c", "config path", func(s string) error {
+		if os.Getenv("CONFIG") != "" {
+			return nil
+		}
+
+		return cfg.parseConfigFile(s)
+	})
+
 	flag.StringVar(&cfg.Address, "a", cfg.Address, "Server address")
 	flag.StringVar(&cfg.Key, "k", cfg.Key, "Hash key")
 	flag.StringVar(&cfg.DatabaseDsn, "d", cfg.Key, "Database dsn")
 	flag.DurationVar(&cfg.StoreInterval, "i", cfg.StoreInterval, "Store save interval")
 	flag.StringVar(&cfg.StoreFile, "f", cfg.StoreFile, "Store file")
 	flag.BoolVar(&cfg.Restore, "r", cfg.Restore, "Restore")
-	flag.Func("c", "Private key file", func(s string) error {
+	flag.Func("pk", "Private key file", func(s string) error {
 		priv, err := parseRsaPrivateKeyFromPemStr(s)
 		if err != nil {
 			return err
@@ -75,6 +93,46 @@ func (cfg *Config) parseFlags() {
 	})
 
 	flag.Parse()
+}
+
+type serverConfigFile struct {
+	Address       string `json:"address"`
+	Restore       bool   `json:"restore"`
+	StoreInterval string `json:"store_interval"`
+	StoreFile     string `json:"store_file"`
+	DatabaseDsn   string `json:"database_dsn"`
+	CryptoKey     string `json:"crypto_key"`
+}
+
+func (cfg *Config) parseConfigFile(path string) error {
+	open, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+
+	var config serverConfigFile
+	err = json.NewDecoder(open).Decode(&config)
+	if err != nil {
+		return err
+	}
+
+	cfg.Address = config.Address
+	cfg.Restore = config.Restore
+	cfg.StoreFile = config.StoreFile
+	cfg.DatabaseDsn = config.DatabaseDsn
+	cfg.StoreInterval, err = time.ParseDuration(config.StoreInterval)
+	if err != nil {
+		return err
+	}
+
+	pub, err := parseRsaPrivateKeyFromPemStr(config.CryptoKey)
+	if err != nil {
+		return err
+	}
+
+	cfg.PrivateKey.PrivateKey = pub
+
+	return nil
 }
 
 func parseRsaPrivateKeyFromPemStr(fileName string) (*rsa.PrivateKey, error) {
