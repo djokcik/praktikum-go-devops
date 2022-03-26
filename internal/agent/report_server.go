@@ -11,10 +11,14 @@ import (
 	"github.com/djokcik/praktikum-go-devops/pkg/logging"
 	"github.com/google/uuid"
 	"net/http"
+	"sync"
 )
 
-func (a *agent) SendToServer(ctx context.Context) func() {
+func (a *agent) SendToServer(ctx context.Context, wg *sync.WaitGroup) func() {
 	return func() {
+		wg.Add(1)
+		defer wg.Done()
+
 		traceID, _ := uuid.NewUUID()
 		logger := a.Log(ctx).With().Str(logging.ServiceKey, "SendToServer").Str(logging.TraceIDKey, traceID.String()).Logger()
 		ctx = logging.SetCtxLogger(ctx, logger)

@@ -20,7 +20,7 @@ var (
 type Agent interface {
 	CollectMetrics(ctx context.Context) func()
 	CollectPsutilMetrics(ctx context.Context) func()
-	SendToServer(ctx context.Context) func()
+	SendToServer(ctx context.Context, wg *sync.WaitGroup) func()
 }
 
 type agent struct {

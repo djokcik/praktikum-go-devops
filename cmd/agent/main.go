@@ -7,6 +7,7 @@ import (
 	"github.com/djokcik/praktikum-go-devops/pkg/logging"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 )
 
@@ -17,6 +18,8 @@ var (
 )
 
 func main() {
+	var wg sync.WaitGroup
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -36,11 +39,12 @@ func main() {
 
 	go helpers.SetTicker(metricAgent.CollectPsutilMetrics(ctx), cfg.PollPsutilsInterval)
 	go helpers.SetTicker(metricAgent.CollectMetrics(ctx), cfg.PollInterval)
-	go helpers.SetTicker(metricAgent.SendToServer(ctx), cfg.ReportInterval)
+	go helpers.SetTicker(metricAgent.SendToServer(ctx, &wg), cfg.ReportInterval)
 
 	quit := make(chan os.Signal, 1)
 
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	<-quit
 	log.Info().Msg("Shutdown Agent ...")
+	wg.Wait()
 }
