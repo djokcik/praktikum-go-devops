@@ -4,6 +4,7 @@ package handler
 
 import (
 	"context"
+	"crypto/rsa"
 	"github.com/djokcik/praktikum-go-devops/internal/server"
 	"github.com/djokcik/praktikum-go-devops/internal/server/service"
 	"github.com/djokcik/praktikum-go-devops/internal/server/storage/reporegistry"
@@ -16,9 +17,10 @@ import (
 // Handler struct for all handlers and require DI dependencies
 type Handler struct {
 	*chi.Mux
-	Hash    commonService.HashService
-	Counter service.CounterService
-	Gauge   service.GaugeService
+	PrivateKey *rsa.PrivateKey
+	Hash       commonService.HashService
+	Counter    service.CounterService
+	Gauge      service.GaugeService
 }
 
 // NewHandler constructor for Handler
@@ -26,10 +28,11 @@ func NewHandler(mux *chi.Mux, cfg server.Config, repoRegistry reporegistry.RepoR
 	hashService := commonService.NewHashService(cfg.Key)
 
 	return &Handler{
-		Mux:     mux,
-		Hash:    hashService,
-		Counter: &service.CounterServiceImpl{Repo: repoRegistry.GetCounterRepo(), Hash: hashService},
-		Gauge:   &service.GaugeServiceImpl{Repo: repoRegistry.GetGaugeRepo(), Hash: hashService},
+		Mux:        mux,
+		PrivateKey: cfg.PrivateKey.PrivateKey,
+		Hash:       hashService,
+		Counter:    &service.CounterServiceImpl{Repo: repoRegistry.GetCounterRepo(), Hash: hashService},
+		Gauge:      &service.GaugeServiceImpl{Repo: repoRegistry.GetGaugeRepo(), Hash: hashService},
 	}
 }
 
