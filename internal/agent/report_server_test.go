@@ -9,7 +9,6 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
-	"sync"
 	"testing"
 )
 
@@ -50,6 +49,6 @@ func TestSendToServer(t *testing.T) {
 		// Close the server when test finishes
 		defer ts.Close()
 
-		metricAgent.SendToServer(context.Background(), &sync.WaitGroup{})()
+		metricAgent.SendToServer(context.Background())
 	})
 }
