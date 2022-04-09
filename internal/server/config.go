@@ -9,6 +9,7 @@ import (
 	"flag"
 	"github.com/caarlos0/env/v6"
 	"github.com/djokcik/praktikum-go-devops/pkg/logging"
+	"net"
 	"os"
 	"time"
 )
@@ -35,6 +36,7 @@ type Config struct {
 	Key           string        `env:"KEY"`
 	DatabaseDsn   string        `env:"DATABASE_DSN"`
 	PrivateKey    RsaPrivateKey `env:"CRYPTO_KEY"`
+	TrustedSubnet *net.IPNet
 }
 
 func NewConfig() Config {
@@ -53,6 +55,10 @@ func NewConfig() Config {
 
 func (cfg *Config) parseEnv() {
 	var err error
+
+	if mask := os.Getenv("TRUSTED_SUBNET"); mask != "" {
+		cfg.TrustedSubnet = parseCIDR(mask)
+	}
 
 	if path := os.Getenv("CONFIG"); path != "" {
 		err = cfg.parseConfigFile(path)
@@ -82,6 +88,12 @@ func (cfg *Config) parseFlags() {
 	flag.DurationVar(&cfg.StoreInterval, "i", cfg.StoreInterval, "Store save interval")
 	flag.StringVar(&cfg.StoreFile, "f", cfg.StoreFile, "Store file")
 	flag.BoolVar(&cfg.Restore, "r", cfg.Restore, "Restore")
+	flag.Func("t", "CIDR", func(mask string) error {
+		cfg.TrustedSubnet = parseCIDR(mask)
+
+		return nil
+	})
+
 	flag.Func("pk", "Private key file", func(s string) error {
 		priv, err := parseRsaPrivateKeyFromPemStr(s)
 		if err != nil {
@@ -102,6 +114,7 @@ type serverConfigFile struct {
 	StoreFile     string `json:"store_file"`
 	DatabaseDsn   string `json:"database_dsn"`
 	CryptoKey     string `json:"crypto_key"`
+	TrustedSubnet string `json:"trusted_subnet"`
 }
 
 func (cfg *Config) parseConfigFile(path string) error {
@@ -120,6 +133,7 @@ func (cfg *Config) parseConfigFile(path string) error {
 	cfg.Restore = config.Restore
 	cfg.StoreFile = config.StoreFile
 	cfg.DatabaseDsn = config.DatabaseDsn
+	cfg.TrustedSubnet = parseCIDR(config.TrustedSubnet)
 	cfg.StoreInterval, err = time.ParseDuration(config.StoreInterval)
 	if err != nil {
 		return err
@@ -133,6 +147,19 @@ func (cfg *Config) parseConfigFile(path string) error {
 	cfg.PrivateKey.PrivateKey = pub
 
 	return nil
+}
+
+func parseCIDR(mask string) *net.IPNet {
+	if mask == "" {
+		return nil
+	}
+
+	_, ipnet, err := net.ParseCIDR(mask)
+	if err != nil {
+		logging.NewLogger().Fatal().Err(err).Msgf("invalid parse cidr: %s", mask)
+	}
+
+	return ipnet
 }
 
 func parseRsaPrivateKeyFromPemStr(fileName string) (*rsa.PrivateKey, error) {

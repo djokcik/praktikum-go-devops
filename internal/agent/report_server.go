@@ -10,7 +10,9 @@ import (
 	"github.com/djokcik/praktikum-go-devops/internal/metric"
 	"github.com/djokcik/praktikum-go-devops/pkg/logging"
 	"github.com/google/uuid"
+	"net"
 	"net/http"
+	"os"
 )
 
 func (a *agent) SendToServer(ctx context.Context) {
@@ -75,6 +77,7 @@ func (a *agent) SendToServer(ctx context.Context) {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Real-IP", GetLocalIP().String())
 
 	res, err := a.Client.Do(req)
 	if err != nil {
@@ -89,4 +92,16 @@ func (a *agent) SendToServer(ctx context.Context) {
 	}
 
 	a.Log(ctx).Info().Msg("Finished send metrics")
+}
+
+func GetLocalIP() net.IP {
+	host, _ := os.Hostname()
+	addrs, _ := net.LookupIP(host)
+	for _, addr := range addrs {
+		if ipv4 := addr.To4(); ipv4 != nil {
+			return ipv4
+		}
+	}
+
+	return nil
 }
