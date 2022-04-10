@@ -1,3 +1,6 @@
+//go:build ignore
+// +build ignore
+
 // Package list of Analyzers that checks for praktikum-go-devops
 package main
 

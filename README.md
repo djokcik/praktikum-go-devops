@@ -1,5 +1,11 @@
 # go-musthave-devops-tpl
 
+# GRPC
+Генерация proto файлов
+```bash
+protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative pkg/proto/metrics.proto
+```
+
 Шаблон репозитория для практического трека «Go в DevOps».
 
 # Начало работы

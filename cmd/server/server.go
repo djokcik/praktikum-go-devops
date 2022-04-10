@@ -2,19 +2,23 @@ package main
 
 import (
 	"context"
+	appgrpc "github.com/djokcik/praktikum-go-devops/internal/grpc"
 	"github.com/djokcik/praktikum-go-devops/internal/server"
 	"github.com/djokcik/praktikum-go-devops/internal/server/handler"
 	"github.com/djokcik/praktikum-go-devops/internal/server/service"
 	"github.com/djokcik/praktikum-go-devops/internal/server/storage/reporegistry"
 	"github.com/djokcik/praktikum-go-devops/pkg/logging"
+	pb "github.com/djokcik/praktikum-go-devops/pkg/proto"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"google.golang.org/grpc"
+	"net"
 	"net/http"
 	"os"
 	"sync"
 )
 
-func makeMetricRoutes(ctx context.Context, wg *sync.WaitGroup, mux *chi.Mux, cfg server.Config) *handler.Handler {
+func getRepoRegistry(ctx context.Context, cfg server.Config, wg *sync.WaitGroup) reporegistry.RepoRegistry {
 	var repoRegistry reporegistry.RepoRegistry
 
 	if cfg.DatabaseDsn != "" {
@@ -30,6 +34,25 @@ func makeMetricRoutes(ctx context.Context, wg *sync.WaitGroup, mux *chi.Mux, cfg
 		repoRegistry = reporegistry.NewInMem(ctx, wg, cfg)
 	}
 
+	return repoRegistry
+}
+
+func makeGRPCMetricServer(cfg server.Config, registry reporegistry.RepoRegistry) (*grpc.Server, net.Listener, error) {
+	listen, err := net.Listen("tcp", cfg.GRPCAddress)
+	if err != nil {
+		logging.NewLogger().Fatal().Err(err).Msgf("error listen gRPC server with address: %s", err)
+		return nil, nil, err
+	}
+
+	// создаём gRPC-сервер без зарегистрированной службы
+	s := grpc.NewServer()
+	// регистрируем сервис
+	pb.RegisterMetricsServer(s, appgrpc.MakeGRPCMetricService(cfg, registry))
+
+	return s, listen, nil
+}
+
+func makeMetricRoutes(_ context.Context, repoRegistry reporegistry.RepoRegistry, mux *chi.Mux, cfg server.Config) *handler.Handler {
 	h := handler.NewHandler(mux, cfg, repoRegistry)
 
 	h.Get("/", h.ListHandler())

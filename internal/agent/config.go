@@ -34,6 +34,7 @@ type Config struct {
 	PollPsutilsInterval time.Duration `envDefault:"10s"`
 	Key                 string        `env:"KEY"`
 	PublicKey           RsaPublicKey  `env:"CRYPTO_KEY"`
+	GRPCAddress         string        `env:"GRPC_ADDRESS"`
 }
 
 func NewConfig() Config {
@@ -76,6 +77,7 @@ func (cfg *Config) parseFlags() {
 
 	flag.StringVar(&cfg.Address, "a", cfg.Address, "Server address")
 	flag.StringVar(&cfg.Key, "k", cfg.Key, "Hash key")
+	flag.StringVar(&cfg.GRPCAddress, "g", cfg.GRPCAddress, "gRPC server address")
 	flag.DurationVar(&cfg.ReportInterval, "r", cfg.ReportInterval, "Report Interval")
 	flag.DurationVar(&cfg.PollInterval, "p", cfg.PollInterval, "Poll Interval")
 	flag.Func("pk", "Public key file", func(s string) error {
@@ -96,6 +98,7 @@ type agentConfigFile struct {
 	ReportInterval string `json:"report_interval"`
 	PollInterval   string `json:"poll_interval"`
 	CryptoKey      string `json:"crypto_key"`
+	GRPCAddress    string `json:"grpc_address"`
 }
 
 func (cfg *Config) parseConfigFile(path string) error {
@@ -111,6 +114,7 @@ func (cfg *Config) parseConfigFile(path string) error {
 	}
 
 	cfg.Address = config.Address
+	cfg.GRPCAddress = config.GRPCAddress
 	cfg.PollInterval, err = time.ParseDuration(config.PollInterval)
 	if err != nil {
 		return err

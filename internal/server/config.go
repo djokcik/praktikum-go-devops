@@ -36,6 +36,7 @@ type Config struct {
 	Key           string        `env:"KEY"`
 	DatabaseDsn   string        `env:"DATABASE_DSN"`
 	PrivateKey    RsaPrivateKey `env:"CRYPTO_KEY"`
+	GRPCAddress   string        `env:"GRPC_ADDRESS"`
 	TrustedSubnet *net.IPNet
 }
 
@@ -88,6 +89,7 @@ func (cfg *Config) parseFlags() {
 	flag.DurationVar(&cfg.StoreInterval, "i", cfg.StoreInterval, "Store save interval")
 	flag.StringVar(&cfg.StoreFile, "f", cfg.StoreFile, "Store file")
 	flag.BoolVar(&cfg.Restore, "r", cfg.Restore, "Restore")
+	flag.StringVar(&cfg.GRPCAddress, "g", cfg.GRPCAddress, "gRPC server address")
 	flag.Func("t", "CIDR", func(mask string) error {
 		cfg.TrustedSubnet = parseCIDR(mask)
 
@@ -115,6 +117,7 @@ type serverConfigFile struct {
 	DatabaseDsn   string `json:"database_dsn"`
 	CryptoKey     string `json:"crypto_key"`
 	TrustedSubnet string `json:"trusted_subnet"`
+	GRPCAddress   string `json:"grpc_address"`
 }
 
 func (cfg *Config) parseConfigFile(path string) error {
@@ -133,6 +136,7 @@ func (cfg *Config) parseConfigFile(path string) error {
 	cfg.Restore = config.Restore
 	cfg.StoreFile = config.StoreFile
 	cfg.DatabaseDsn = config.DatabaseDsn
+	cfg.GRPCAddress = config.GRPCAddress
 	cfg.TrustedSubnet = parseCIDR(config.TrustedSubnet)
 	cfg.StoreInterval, err = time.ParseDuration(config.StoreInterval)
 	if err != nil {

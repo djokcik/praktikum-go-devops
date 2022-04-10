@@ -6,9 +6,11 @@ import (
 	"crypto/rand"
 	"crypto/sha1"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/djokcik/praktikum-go-devops/internal/metric"
 	"github.com/djokcik/praktikum-go-devops/pkg/logging"
+	pb "github.com/djokcik/praktikum-go-devops/pkg/proto"
 	"github.com/google/uuid"
 	"net"
 	"net/http"
@@ -62,33 +64,66 @@ func (a *agent) SendToServer(ctx context.Context) {
 		return
 	}
 
-	if a.cfg.PublicKey.PublicKey != nil {
-		body, err = a.Hash.EncryptOAEP(sha1.New(), rand.Reader, a.cfg.PublicKey.PublicKey, body, nil)
+	if a.GRPCClient != nil {
+		var metrics []*pb.Metric
+
+		for _, metricDto := range metricDtoList {
+			pbMetric := pb.Metric{
+				ID:    metricDto.ID,
+				Hash:  metricDto.Hash,
+				MType: metricDto.MType,
+			}
+
+			if metricDto.Delta != nil {
+				pbMetric.Delta = *metricDto.Delta
+			}
+
+			if metricDto.Value != nil {
+				pbMetric.Value = *metricDto.Value
+			}
+
+			metrics = append(metrics, &pbMetric)
+		}
+
+		res, err := a.GRPCClient.SendMetric(ctx, &pb.SendMetricRequest{Metrics: metrics})
 		if err != nil {
-			a.Log(ctx).Error().Err(err).Msgf("encrypt: %s", err)
+			a.Log(ctx).Error().Err(err).Msg("gRPC request ended with error")
 			return
 		}
-	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
-	if err != nil {
-		a.Log(ctx).Error().Err(err).Msg("request was interrupted")
-		return
-	}
+		if res.Error != "" {
+			a.Log(ctx).Error().Err(errors.New(res.Error)).Msg("gRPC request ended with error")
+			return
+		}
+	} else {
+		if a.cfg.PublicKey.PublicKey != nil {
+			body, err = a.Hash.EncryptOAEP(sha1.New(), rand.Reader, a.cfg.PublicKey.PublicKey, body, nil)
+			if err != nil {
+				a.Log(ctx).Error().Err(err).Msgf("encrypt: %s", err)
+				return
+			}
+		}
 
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-Real-IP", GetLocalIP().String())
+		req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
+		if err != nil {
+			a.Log(ctx).Error().Err(err).Msg("request was interrupted")
+			return
+		}
 
-	res, err := a.Client.Do(req)
-	if err != nil {
-		a.Log(ctx).Error().Err(err).Msg("request ended with error")
-		return
-	}
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("X-Real-IP", GetLocalIP().String())
 
-	err = res.Body.Close()
-	if err != nil {
-		a.Log(ctx).Error().Err(err).Msg("read from body closed with error")
-		return
+		res, err := a.Client.Do(req)
+		if err != nil {
+			a.Log(ctx).Error().Err(err).Msg("request ended with error")
+			return
+		}
+
+		err = res.Body.Close()
+		if err != nil {
+			a.Log(ctx).Error().Err(err).Msg("read from body closed with error")
+			return
+		}
 	}
 
 	a.Log(ctx).Info().Msg("Finished send metrics")

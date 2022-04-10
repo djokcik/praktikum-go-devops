@@ -5,6 +5,7 @@ import (
 	"github.com/djokcik/praktikum-go-devops/internal/agent"
 	"github.com/djokcik/praktikum-go-devops/internal/helpers"
 	"github.com/djokcik/praktikum-go-devops/pkg/logging"
+	"google.golang.org/grpc"
 	"os/signal"
 	"sync"
 	"syscall"
@@ -34,7 +35,18 @@ func main() {
 		Info().
 		Msgf("Config: %+v", cfg)
 
-	metricAgent := agent.NewAgent(cfg)
+	var conn grpc.ClientConnInterface
+
+	if cfg.GRPCAddress != "" {
+		var err error
+
+		conn, err = grpc.Dial(cfg.GRPCAddress)
+		if err != nil {
+			logging.NewLogger().Fatal().Err(err).Msg("invalid connect to gRPC server")
+		}
+	}
+
+	metricAgent := agent.NewAgent(cfg, conn)
 
 	go helpers.SetTicker(metricAgent.CollectPsutilMetrics(ctx), cfg.PollPsutilsInterval)
 	go helpers.SetTicker(metricAgent.CollectMetrics(ctx), cfg.PollInterval)

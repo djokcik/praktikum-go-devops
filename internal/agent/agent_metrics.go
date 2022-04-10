@@ -5,8 +5,10 @@ import (
 	"github.com/djokcik/praktikum-go-devops/internal/agent/metric"
 	"github.com/djokcik/praktikum-go-devops/internal/service"
 	"github.com/djokcik/praktikum-go-devops/pkg/logging"
+	pb "github.com/djokcik/praktikum-go-devops/pkg/proto"
 	"github.com/rs/zerolog"
 	"github.com/shirou/gopsutil/cpu"
+	"google.golang.org/grpc"
 	"net/http"
 	"sync"
 )
@@ -30,15 +32,20 @@ type agent struct {
 	Hash            service.HashService
 	metrics         []AgentMetric
 	cfg             Config
+	GRPCClient      pb.MetricsClient
 }
 
-func NewAgent(cfg Config) Agent {
+func NewAgent(cfg Config, conn grpc.ClientConnInterface) Agent {
 	metricAgent := new(agent)
 	metricAgent.CollectedMetric = make(map[string]SendAgentMetric)
 	metricAgent.Client = &http.Client{}
 	metricAgent.metrics = GetAgentMetrics()
 	metricAgent.cfg = cfg
 	metricAgent.Hash = service.NewHashService(cfg.Key)
+
+	if conn != nil {
+		metricAgent.GRPCClient = pb.NewMetricsClient(conn)
+	}
 
 	return metricAgent
 }

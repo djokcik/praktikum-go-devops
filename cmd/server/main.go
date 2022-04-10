@@ -33,6 +33,22 @@ func main() {
 	log.Info().Msgf("Build date: %s", buildDate)
 	log.Info().Msgf("Build commit: %s", buildCommit)
 
+	repoRegistry := getRepoRegistry(ctx, cfg, wg)
+
+	go func() {
+		if cfg.GRPCAddress != "" {
+			s, listen, err := makeGRPCMetricServer(cfg, repoRegistry)
+			if err != nil {
+				log.Fatal().Err(err).Msg("error listen gRPC server")
+			}
+
+			log.Info().Msgf("gRPC server started with address: %s", cfg.GRPCAddress)
+			if err := s.Serve(listen); err != nil {
+				log.Fatal().Err(err).Msg("error start gRPC server")
+			}
+		}
+	}()
+
 	mux := chi.NewMux()
 
 	mux.Use(middleware.RequestID)
@@ -42,14 +58,13 @@ func main() {
 	mux.Use(serverMiddleware.GzipHandle)
 	mux.Use(serverMiddleware.LoggerMiddleware())
 
-	makeMetricRoutes(ctx, wg, mux, cfg)
+	makeMetricRoutes(ctx, repoRegistry, mux, cfg)
 
 	go func() {
 		err := http.ListenAndServe(cfg.Address, mux)
 		if err != nil {
 			log.Fatal().Err(err).Msg("server stopped")
 		}
-
 	}()
 
 	quit := make(chan os.Signal, 1)
