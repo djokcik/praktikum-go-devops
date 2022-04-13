@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option go_package =  "github.com/djokcik/praktikum-go-devops/pkg/proto";
+
+package grpc;
+
+message Metric {
+  string ID = 1;
+  string MType = 2;
+  int64 Delta = 3;
+  double Value = 4;
+  string Hash = 5;
+}
+
+message SendMetricRequest {
+  repeated Metric metrics = 1;
+}
+
+message SendMetricResponse {
+  string error = 1;
+}
+
+service Metrics {
+  rpc SendMetric(SendMetricRequest) returns (SendMetricResponse);
+}
+

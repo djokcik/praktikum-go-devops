@@ -4,5 +4,6 @@
   "store_interval": "1s",
   "store_file": "/tmp/devops-metrics-db.json",
   "database_dsn": "",
-  "crypto_key": "key.private"
+  "crypto_key": "key.private",
+  "trusted_subnet": "192.168.1.0/24"
 }
